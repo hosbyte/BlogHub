@@ -17,7 +17,7 @@ class AddExtraFieldsToUsersTable extends Migration
             $table->unsignedBigInteger('role_id')->nullable()->after('id');
             $table->string('avatar')->nullable()->after('email');
             $table->text('bio')->nullable()->after('avatar');
-            $table->enum('status' , ['active' . 'inactive' , 'suspended'])->default('active')->after('bio');
+            $table->enum('status' , ['active' , 'inactive' , 'suspended'])->default('active')->after('bio');
             $table->timestamp('last_login_at')->nullable()->after('status');
             $table->string('last_login_ip')->nullable()->after('last_login_at');
 

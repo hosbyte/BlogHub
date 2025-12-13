@@ -24,7 +24,7 @@ class CreateActivitiesTable extends Migration
             $table->timestamps();
 
             // کلیدهای خارجی
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
 
             // ایندکس‌ها
             $table->index('user_id');

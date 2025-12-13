@@ -23,8 +23,8 @@ class CreateCategoriesTable extends Migration
             $table->timestamps();
 
             // کلید خارجی
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('parent_id')->references('id')->on('categories')->onDelete('set null');
+            // $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            // $table->foreign('parent_id')->references('id')->on('categories')->onDelete('set null');
 
             //indexs
             $table->index('slug');

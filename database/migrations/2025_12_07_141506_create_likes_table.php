@@ -22,7 +22,7 @@ class CreateLikesTable extends Migration
             $table->timestamps();
 
             // کلیدهای خارجی
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            //$table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             // ایندکس‌ها
             $table->index('user_id');

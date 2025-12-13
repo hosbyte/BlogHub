@@ -20,8 +20,8 @@ class CreateRolePermissionTable extends Migration
             $table->timestamps();
 
             //? کلید خارجی
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
-            $table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade');
+            // $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
+            // $table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade');
 
             // جلوگیری از تکراری بودن رابطه ها
             $table->unique(['role_id' , 'permission_id']);

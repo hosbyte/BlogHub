@@ -20,8 +20,8 @@ class CreatePostTagTable extends Migration
             $table->timestamps();
 
             //کلید های خارجی
-            $table->foreign('post_id')->references('id')->on('posts')->onDelete('cacade');
-            $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cacade');
+            // $table->foreign('post_id')->references('id')->on('posts')->onDelete('cacade');
+            // $table->foreign('tag_id')->references('id')->on('tags')->onDelete('cacade');
 
             // جلوگیری از تکراری بودن رابطه
             $table->unique(['post_id', 'tag_id']);

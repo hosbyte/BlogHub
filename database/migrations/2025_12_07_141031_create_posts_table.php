@@ -29,9 +29,9 @@ class CreatePostsTable extends Migration
             $table->timestamps();
 
             // کلیدهای خارجی
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
-            $table->foreign('thumbnail_id')->references('id')->on('media')->onDelete('set null');
+        //     $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+        //     $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
+        //     $table->foreign('thumbnail_id')->references('id')->on('media')->onDelete('set null');
 
             // ایندکس‌ها
             $table->index('slug');
