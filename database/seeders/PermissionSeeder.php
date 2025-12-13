@@ -100,14 +100,14 @@ class PermissionSeeder extends Seeder
             'edit-comments',
             'view-categories',
         ])->get();
-        $authorRole->Permissions()->sync($auothorPermission->pluc('id'));
+        $authorRole->Permissions()->sync($auothorPermission->pluck('id'));
 
         // نقش کاربر - کمترین دسترسی
         $userRole = Role::where('name' , 'user')->first();
-        $userPermission = Permission::wherIn('name' , [
+        $userPermission = Permission::whereIn('name' , [
             'view-posts',
             'view-camment',
         ])->get();
-        $userRole->Permissions()->sunc($userPermission->pluc('id'));
+        $userRole->Permissions()->sync($userPermission->pluck('id'));
     }
 }

@@ -69,7 +69,7 @@ class CategorySeeder extends Seeder
                 'slug' => 'laravel',
                 'description' => 'مقالات آموزش و ترفندهای لاراول',
                 'parent_id' => $createdCategories['programming'],
-                'user_if'=> $admin->id,
+                'user_id'=> $admin->id,
             ],
             [
                 'name' => 'ری‌اکت',

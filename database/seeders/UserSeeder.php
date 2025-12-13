@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         // کاربر ادمین اصلی
         $adminRole = Role::where('name' , 'admin')->first();
 
-        User::updateOrCreatw(
+        User::updateOrCreate(
             ['email' => 'hosbyte@gmail.com'],
             [
                 'name' => 'مدیر سیستم',
@@ -36,7 +36,7 @@ class UserSeeder extends Seeder
         // کاربر نویسنده نمونه
         $authorRole = Role::where('name' , 'author')->first();
 
-        User::updateOrCraete(
+        User::updateOrCreate(
             ['email' => 'author@bloghub.local'],
             [
                 'name' => 'نویسنده نمونه',
@@ -51,7 +51,7 @@ class UserSeeder extends Seeder
         );
 
         // کاربر عادی نمونه
-        $userRole = Role::where('name' . 'user')->first();
+        $userRole = Role::where('name' , 'user')->first();
 
         User::updateOrCreate(
             ['email' => 'user@bloghub.local'],
