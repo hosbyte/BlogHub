@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class PostController extends Controller
@@ -13,7 +14,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        //
+        $post = Post::published()->latest()->paginate(10);
+        return view('front.posts.index' , compact('post'));
     }
 
     /**
@@ -43,9 +45,12 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($slug)
     {
-        //
+        $post = Post::where('slug' , $slug)->firstOrFail();
+        $post -> incrementViewCount();
+
+        return view('front.posts.show' , compact('post'));
     }
 
     /**

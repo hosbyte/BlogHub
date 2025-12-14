@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -13,7 +14,14 @@ class HomeController extends Controller
      */
     public function index()
     {
-        //
+        $data = [
+            'featuredPosts' => Post::published()->featured()->limit(3)->get(),
+            'recentPosts' => Post::published()->recent(6)->get(),
+            'popularPosts' => Post::published()->popular(5)->get(),
+            'categories' => Post::published()->mianCategories()->get(),
+        ];
+
+        return view('front.hom' , $data);
     }
 
     /**
