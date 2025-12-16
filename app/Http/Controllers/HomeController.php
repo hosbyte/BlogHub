@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Category;
 use Illuminate\Http\Request;
+
 
 class HomeController extends Controller
 {
@@ -15,13 +17,17 @@ class HomeController extends Controller
     public function index()
     {
         $data = [
+            // مقالات ویژه - از Post
             'featuredPosts' => Post::published()->featured()->limit(3)->get(),
+            // مقالات اخیر - از Post
             'recentPosts' => Post::published()->recent(6)->get(),
+            // مقالات پربازدید - از Post
             'popularPosts' => Post::published()->popular(5)->get(),
-            'categories' => Post::published()->mianCategories()->get(),
+             // دسته‌بندی‌ها - از Category (بدون published!)
+            'categories' => Category::hasPosts()->mainCategories()->get(),
         ];
 
-        return view('front.hom' , $data);
+        return view('front.home' , $data);
     }
 
     /**

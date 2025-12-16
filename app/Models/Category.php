@@ -114,12 +114,12 @@ class Category extends Model
     }
 
     /**
-     * اسکوپ برای دسته‌بندی‌های فعال
-     */
+    * اسکوپ برای دسته‌بندی‌های دارای مقاله
+    */
     public function scopeHasPosts($query)
     {
         return $query->whereHas('posts', function ($q) {
-            $q->where('status', 'published');
+            $q->where('status', 'published'); // فقط مقالات منتشر شده
         });
     }
 }

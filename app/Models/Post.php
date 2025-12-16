@@ -93,4 +93,37 @@ class Post extends Model
 
         return $tagIds;
     }
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now());
+    }
+
+    /**
+     * اسکوپ برای مقالات ویژه
+     */
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    /**
+     * اسکوپ برای مقالات اخیر
+     */
+    public function scopeRecent($query, $limit = 10)
+    {
+        return $query->orderBy('published_at', 'desc')
+            ->limit($limit);
+    }
+
+    /**
+     * اسکوپ برای مقالات پربازدید
+     */
+    public function scopePopular($query, $limit = 10)
+    {
+        return $query->orderBy('view_count', 'desc')
+            ->limit($limit);
+    }
 }

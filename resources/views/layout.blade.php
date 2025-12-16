@@ -54,18 +54,18 @@
                     </ul>
                 </li>
 
-                <li><a href="{{ route('posts.popular') }}" class="nav-link">
+                {{-- <li><a href="{{ route('posts.popular') }}" class="nav-link"> --}}
                         <i class="fas fa-fire"></i> پربازدیدها
                     </a></li>
 
-                <li><a href="{{ route('about') }}" class="nav-link">
+                {{-- <li><a href="{{ route('about') }}" class="nav-link"> --}}
                         <i class="fas fa-info-circle"></i> درباره ما
                     </a></li>
             </ul>
 
             <!-- بخش جستجو -->
             <div class="search-container">
-                <form action="{{ route('search') }}" method="GET" class="search-form">
+                {{-- <form action="{{ route('search') }}" method="GET" class="search-form"> --}}
                     <input type="text" name="q" placeholder="جستجو مقالات..." class="search-input">
                     <button type="submit" class="search-btn">
                         <i class="fas fa-search"></i>
@@ -146,9 +146,9 @@
         </div>
         <ul class="mobile-nav">
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> صفحه اصلی</a></li>
-            <li><a href="{{ route('categories.index') }}"><i class="fas fa-th-large"></i> دسته‌بندی‌ها</a></li>
-            <li><a href="{{ route('posts.popular') }}"><i class="fas fa-fire"></i> پربازدیدها</a></li>
-            <li><a href="{{ route('about') }}"><i class="fas fa-info-circle"></i> درباره ما</a></li>
+            {{-- <li><a href="{{ route('categories.index') }}"><i class="fas fa-th-large"></i> دسته‌بندی‌ها</a></li> --}}
+            {{-- <li><a href="{{ route('posts.popular') }}"><i class="fas fa-fire"></i> پربازدیدها</a></li> --}}
+            {{-- <li><a href="{{ route('about') }}"><i class="fas fa-info-circle"></i> درباره ما</a></li> --}}
 
             @auth
                 <li class="mobile-user-info">
@@ -219,11 +219,11 @@
                     <h3 class="footer-title">لینک‌های سریع</h3>
                     <ul class="footer-links">
                         <li><a href="{{ route('home') }}"><i class="fas fa-chevron-left"></i> صفحه اصلی</a></li>
-                        <li><a href="{{ route('posts.popular') }}"><i class="fas fa-chevron-left"></i> پربازدیدها</a>
+                        {{-- <li><a href="{{ route('posts.popular') }}"><i class="fas fa-chevron-left"></i> پربازدیدها</a> --}}
                         </li>
                         <li><a href="{{ route('posts.index') }}"><i class="fas fa-chevron-left"></i> همه مقالات</a>
                         </li>
-                        <li><a href="{{ route('authors.index') }}"><i class="fas fa-chevron-left"></i> نویسندگان</a>
+                        {{-- <li><a href="{{ route('authors.index') }}"><i class="fas fa-chevron-left"></i> نویسندگان</a> --}}
                         </li>
                     </ul>
                 </div>
