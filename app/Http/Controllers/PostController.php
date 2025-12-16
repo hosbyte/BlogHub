@@ -111,13 +111,64 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($slug)
-    {
-        $post = Post::where('slug' , $slug)->firstOrFail();
-        $post -> incrementViewCount();
+    // public function show($slug)
+    // {
+    //     $post = Post::where('slug' , $slug)->firstOrFail();
 
-        return view('front.posts.show' , compact('post'));
-    }
+    //     // افزایش تعداد بازدید
+    //     $post->increment('view_count');
+
+    //     // مقالات مرتبط
+    //     $relatedPosts = Post::published()
+    //         ->where('category_id' , $post->category_id)
+    //         ->where('id' , '!=' , $post->id)
+    //         ->limit(3)
+    //         ->get();
+
+    //     // نظرات مقاله
+    //     $comments = $post->comment()
+    //         ->where('status' , 'approved')
+    //         ->whereNull('parent_id')
+    //         ->with('replies')
+    //         ->latest()
+    //         ->get();
+
+
+    //     return view('front.posts.show' , compact(
+    //         'post',
+    //         'relatedPosts',
+    //         'comments'
+    //     ));
+    // }
+    public function show($slug)
+{
+    $post = Post::where('slug', $slug)
+        ->with(['user', 'category', 'tags', 'comments' => function($query) {
+            $query->where('status', 'approved')
+                  ->whereNull('parent_id')
+                  ->with('replies');
+        }])
+        ->firstOrFail();
+
+    // افزایش تعداد بازدید
+    $post->increment('view_count');
+
+    // مقالات مرتبط
+    $relatedPosts = Post::published()
+        ->where('category_id', $post->category_id)
+        ->where('id', '!=', $post->id)
+        ->limit(3)
+        ->get();
+
+    // نظرات از رابطه بارگیری شده
+    $comments = $post->comments;
+
+    return view('front.posts.show', compact(
+        'post',
+        'relatedPosts',
+        'comments'
+    ));
+}
 
     /**
      * Show the form for editing the specified resource.
