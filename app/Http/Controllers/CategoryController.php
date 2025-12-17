@@ -47,9 +47,26 @@ class CategoryController extends Controller
     public function show($slug)
     {
         $category = Category::where('slug' , $slug)->firstOrFail();
-        $posts = $category->posts()->published()->paginate(10);
+        $posts = $category->posts()
+            ->published()
+            ->latest()
+            ->paginate(10);
 
-        return view('front.categories.show' , compact('category' , 'posts'));
+        // زیردسته‌ها
+        $subcategories = $category->children()->hasPosts()->get();
+
+        // دسته‌بندی‌های هم‌سطح
+        $siblingCategories = Category::where('parent_id' , $category->parent_id)
+            ->where('id' , '!=' , $category->id)
+            ->hasPosts()
+            ->get();
+
+        return view('front.categories.show' , compact(
+            'category' ,
+            'posts',
+            'subcategories',
+            'siblingCategories',
+        ));
     }
 
     /**
