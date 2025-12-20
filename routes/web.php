@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,9 +17,11 @@ use App\Http\Controllers\CategoryController;
 |
 */
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
+// auth route
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+require __DIR__.'/auth.php';
 
 // صفحه اصلی
 Route::get('/' , [HomeController::class , 'index'])->name('home');
@@ -26,17 +29,20 @@ Route::get('/' , [HomeController::class , 'index'])->name('home');
 //مقالات
 Route::get('/posts' , [PostController::class , 'index'])->name('posts.index');
 Route::get('/posts/{slug}' , [PostController::class , 'show'])->name('posts.show');
+Route::middleware('auth')->group(function () {
+    Route::post('/comments' , [CommentController::class , 'store'])->name('comments.store');
+    Route::delete('/comments/{comment}' , [CommentController::class , 'destroy'])->name('comments.destroy');
+});
+
+// پنل کاربران (برای همه کاربران لاگین کرده)
+Route::middleware('auth')->group(function () {
+    
+});
 
 // دسته بندی
 Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
 
 
-
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-
-require __DIR__.'/auth.php';
 
 
 
