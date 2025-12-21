@@ -34,10 +34,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comments/{comment}' , [CommentController::class , 'destroy'])->name('comments.destroy');
 });
 
-// پنل کاربران (برای همه کاربران لاگین کرده)
-Route::middleware('auth')->group(function () {
-    
-});
 
 // دسته بندی
 Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
