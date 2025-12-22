@@ -1,156 +1,228 @@
 @extends('layout')
 
-@section('title', 'ویرایش پروفایل')
+@section('title', 'ویرایش پروفایل - BlogHub')
+
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/profile.css') }}">
+@endsection
 
 @section('content')
-    <div class="container mx-auto py-8 max-w-4xl">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-2xl font-bold text-gray-800">ویرایش پروفایل</h1>
-            <a href="{{ route('user.dashboard') }}" class="text-blue-600 hover:text-blue-800">
-                ← بازگشت به داشبورد
+    <div class="profile-edit-container">
+        <!-- هدر صفحه -->
+        <div class="profile-header">
+            <h1>
+                <i class="fas fa-user-edit"></i> ویرایش پروفایل
+            </h1>
+            <a href="{{ route('user.dashboard') }}" class="back-to-dashboard">
+                <i class="fas fa-arrow-right"></i> بازگشت به داشبورد
             </a>
         </div>
 
+        <!-- پیام موفقیت -->
         @if (session('success'))
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <div class="alert-success">
+                <i class="fas fa-check-circle"></i>
                 {{ session('success') }}
             </div>
         @endif
 
-        <div class="bg-white rounded-lg shadow overflow-hidden">
-            <div class="p-6">
-                <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
+        <!-- کارت ویرایش پروفایل -->
+        <div class="profile-edit-card">
+            <div class="profile-edit-content">
+                <form action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data"
+                    id="profileForm">
                     @csrf
                     @method('PUT')
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- اطلاعات شخصی -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-4">اطلاعات شخصی</h3>
+                    <div class="profile-form-grid">
+                        <!-- بخش اطلاعات شخصی -->
+                        <div class="profile-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-user-circle"></i> اطلاعات شخصی
+                            </h3>
 
-                            <div>
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-                                    نام کامل
-                                </label>
+                            <div class="form-group">
+                                <label for="name" class="form-label">نام کامل</label>
                                 <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}"
-                                    class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
-                                    required>
+                                    class="form-input" placeholder="نام و نام خانوادگی خود را وارد کنید" required>
                                 @error('name')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                    <span class="form-error">{{ $message }}</span>
                                 @enderror
                             </div>
 
-                            <div>
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                                    آدرس ایمیل
-                                </label>
+                            <div class="form-group">
+                                <label for="email" class="form-label">آدرس ایمیل</label>
                                 <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}"
-                                    class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
-                                    required>
+                                    class="form-input" placeholder="example@email.com" required>
                                 @error('email')
-                                    <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                                    <span class="form-error">{{ $message }}</span>
                                 @enderror
                             </div>
 
-                            <div>
-                                <label for="bio" class="block text-sm font-medium text-gray-700 mb-1">
-                                    بیوگرافی
-                                </label>
-                                <textarea id="bio" name="bio" rows="3"
-                                    class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500">{{ old('bio', $user->bio) }}</textarea>
-                                <p class="text-xs text-gray-500 mt-1">حداکثر ۵۰۰ کاراکتر</p>
+                            <div class="form-group">
+                                <label for="bio" class="form-label">بیوگرافی</label>
+                                <textarea id="bio" name="bio" class="form-input" placeholder="درباره خودتان بنویسید...">{{ old('bio', $user->bio) }}</textarea>
+                                <span class="form-hint">حداکثر ۵۰۰ کاراکتر</span>
+                                @error('bio')
+                                    <span class="form-error">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
-                        <!-- آواتار -->
-                        <div class="space-y-4">
-                            <h3 class="text-lg font-semibold text-gray-700 mb-4">تصویر پروفایل</h3>
+                        <!-- بخش آواتار -->
+                        <div class="profile-section avatar-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-camera"></i> تصویر پروفایل
+                            </h3>
 
-                            <div class="flex flex-col items-center">
-                                <!-- نمایش آواتار فعلی -->
-                                <div class="mb-4">
-                                    <img id="avatar-preview"
-                                        src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.png') }}"
-                                        alt="آواتار فعلی"
-                                        class="w-32 h-32 rounded-full object-cover border-4 border-white shadow">
-                                </div>
+                            <div class="avatar-preview-container">
+                                <img id="avatarPreview"
+                                    src="{{ $user->avatar ? asset('storage/' . $user->avatar) : asset('images/default-avatar.png') }}"
+                                    alt="آواتار فعلی" class="avatar-preview">
+                            </div>
 
-                                <div>
-                                    <label for="avatar" class="block text-sm font-medium text-gray-700 mb-1">
-                                        تغییر تصویر
+                            <div class="form-group">
+                                <div class="avatar-upload">
+                                    <label for="avatar" class="avatar-upload-label">
+                                        <i class="fas fa-cloud-upload-alt"></i> انتخاب تصویر
                                     </label>
                                     <input type="file" id="avatar" name="avatar" accept="image/*"
-                                        class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                         onchange="previewImage(this)">
-                                    <p class="text-xs text-gray-500 mt-1">فرم‌های مجاز: JPG, PNG, GIF (حداکثر ۲ مگابایت)</p>
-                                    @error('avatar')
-                                        <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                                    @enderror
                                 </div>
+                                <span class="upload-hint">فرمت‌های مجاز: JPG, PNG, GIF | حداکثر حجم: ۲ مگابایت</span>
+                                @error('avatar')
+                                    <span class="form-error">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
                     </div>
 
-                    <!-- تغییر رمز عبور -->
-                    <div class="mt-8 pt-8 border-t">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">تغییر رمز عبور</h3>
-                        <p class="text-sm text-gray-500 mb-4">فقط در صورتی پر کنید که می‌خواهید رمز عبور را تغییر دهید.</p>
+                    <!-- بخش تغییر رمز عبور -->
+                    <div class="password-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-key"></i> تغییر رمز عبور
+                        </h3>
 
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                                <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">
-                                    رمز عبور فعلی
-                                </label>
-                                <input type="password" id="current_password" name="current_password"
-                                    class="w-full px-3 py-2 border rounded">
+                        <div class="password-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>فقط در صورتی پر کنید که می‌خواهید رمز عبور را تغییر دهید.</span>
+                        </div>
+
+                        <div class="password-grid">
+                            <div class="form-group">
+                                <label for="current_password" class="form-label">رمز عبور فعلی</label>
+                                <input type="password" id="current_password" name="current_password" class="form-input"
+                                    placeholder="رمز عبور فعلی">
+                                @error('current_password')
+                                    <span class="form-error">{{ $message }}</span>
+                                @enderror
                             </div>
 
-                            <div>
-                                <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">
-                                    رمز عبور جدید
-                                </label>
-                                <input type="password" id="new_password" name="new_password"
-                                    class="w-full px-3 py-2 border rounded">
+                            <div class="form-group">
+                                <label for="new_password" class="form-label">رمز عبور جدید</label>
+                                <input type="password" id="new_password" name="new_password" class="form-input"
+                                    placeholder="رمز عبور جدید">
                             </div>
 
-                            <div>
-                                <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
-                                    تکرار رمز عبور جدید
-                                </label>
+                            <div class="form-group">
+                                <label for="new_password_confirmation" class="form-label">تکرار رمز عبور جدید</label>
                                 <input type="password" id="new_password_confirmation" name="new_password_confirmation"
-                                    class="w-full px-3 py-2 border rounded">
+                                    class="form-input" placeholder="تکرار رمز عبور جدید">
                             </div>
                         </div>
-                        @error('current_password')
-                            <p class="text-red-500 text-sm mt-2">{{ $message }}</p>
-                        @enderror
                     </div>
 
-                    <!-- دکمه‌ها -->
-                    <div class="mt-8 flex justify-end space-x-4">
-                        <a href="{{ route('user.dashboard') }}"
-                            class="px-6 py-2 border rounded text-gray-700 hover:bg-gray-50">
-                            انصراف
+                    <!-- دکمه‌های فرم -->
+                    <div class="form-actions">
+                        <a href="{{ route('user.dashboard') }}" class="btn-cancel">
+                            <i class="fas fa-times"></i> انصراف
                         </a>
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            ذخیره تغییرات
+                        <button type="submit" class="btn-submit" id="submitBtn">
+                            <i class="fas fa-save"></i>
+                            <span>ذخیره تغییرات</span>
+                            <div class="loading-spinner" id="loadingSpinner"></div>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+@endsection
 
+@section('scripts')
     <script>
+        // پیش‌نمایش تصویر آواتار
         function previewImage(input) {
-            const preview = document.getElementById('avatar-preview');
+            const preview = document.getElementById('avatarPreview');
             if (input.files && input.files[0]) {
+                const file = input.files[0];
+
+                // بررسی حجم فایل (حداکثر ۲ مگابایت)
+                if (file.size > 2 * 1024 * 1024) {
+                    alert('حجم فایل نباید بیشتر از ۲ مگابایت باشد.');
+                    input.value = '';
+                    return;
+                }
+
+                // بررسی فرمت فایل
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+                if (!validTypes.includes(file.type)) {
+                    alert('فقط فرمت‌های JPG, PNG و GIF مجاز هستند.');
+                    input.value = '';
+                    return;
+                }
+
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     preview.src = e.target.result;
+                    preview.classList.add('pulse-effect');
+                    setTimeout(() => preview.classList.remove('pulse-effect'), 2000);
                 }
-                reader.readAsDataURL(input.files[0]);
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // نمایش اسپینر هنگام ارسال فرم
+        document.getElementById('profileForm').addEventListener('submit', function() {
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+
+            submitBtn.disabled = true;
+            submitBtn.querySelector('span').textContent = 'در حال ذخیره...';
+            loadingSpinner.style.display = 'inline-block';
+        });
+
+        // اعتبارسنجی فیلدهای رمز عبور
+        document.getElementById('current_password')?.addEventListener('input', validatePasswords);
+        document.getElementById('new_password')?.addEventListener('input', validatePasswords);
+
+        function validatePasswords() {
+            const currentPassword = document.getElementById('current_password');
+            const newPassword = document.getElementById('new_password');
+            const confirmPassword = document.getElementById('new_password_confirmation');
+
+            // اگر رمز جدید پر شده باشد
+            if (newPassword.value) {
+                // رمز فعلی باید پر شود
+                if (!currentPassword.value) {
+                    currentPassword.classList.add('error');
+                } else {
+                    currentPassword.classList.remove('error');
+                }
+
+                // تأیید رمز جدید
+                if (confirmPassword.value && newPassword.value !== confirmPassword.value) {
+                    confirmPassword.classList.add('error');
+                } else {
+                    confirmPassword.classList.remove('error');
+                }
+
+                // طول رمز جدید
+                if (newPassword.value.length < 8) {
+                    newPassword.classList.add('error');
+                } else {
+                    newPassword.classList.remove('error');
+                }
             }
         }
     </script>
