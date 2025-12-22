@@ -51,12 +51,16 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
     Route::get('/posts/{post}/edit' , [UserPostController::class , 'edit'])->name('posts.edit');
     Route::delete('/posts/{post}' , [UserPostController::class , 'destroy'])->name('posts.destroy');
     Route::post('/posts/{post}/status' , [UserPostController::class , 'changeStatus'])->name('posts.change-status');
+
+    // عملیات گروهی
+    Route::post('/posts/bulk-status' , [UserPostController::class , 'bulkChangeStatus'])->name('posts.bulk-status');
+    Route::post('/posts/bulk-delete', [UserPostController::class, 'bulkDelete'])->name('posts.bulk-delete');
 });
 
 // auth route
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth'])->name('breeze.dashboard');
+})->middleware(['auth'])->name('dashboard');
 require __DIR__.'/auth.php';
 
 

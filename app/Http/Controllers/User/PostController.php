@@ -28,7 +28,13 @@ class PostController extends Controller
             $query->where('status' , $request->status);
         }
 
-        // جستجو  
+        // فیلتر دسته‌بندی
+        if ($request->has('category_id'))
+        {
+            $query->where('category_id', $request->category_id);
+        }
+
+        // جستجو
         if ($request->has('search'))
         {
             $query->where(function ($q) use ($request) {
@@ -37,7 +43,27 @@ class PostController extends Controller
             });
         }
 
+        // مرتب‌سازی
+        switch ($request->sort)
+        {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'most_viewed':
+                $query->orderBy('view_count', 'desc');
+                break;
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
+                break;
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
+
         $posts = $query->orderBy('created_at' , 'desc')->paginate(10)->withQueryString();
+        $categories = Category::all(); // برای dropdown دسته‌بندی
 
         $statuses = [
             'draft' => 'پیش نویس',
@@ -45,7 +71,7 @@ class PostController extends Controller
             'archived' => 'آرشیو',
         ];
 
-        return view('user.posts.index' , compact('posts' , 'statuses'));
+        return view('user.posts.index' , compact('posts' , 'statuses' , 'categories'));
     }
 
     /**
@@ -133,7 +159,7 @@ class PostController extends Controller
     public function changeStatus(Post $post , Request $request)
     {
         $this->authorize('update' , $post);
-        
+
         $request->validate([
             'status' => 'required|in:draft,published,archived'
         ]);
@@ -142,5 +168,52 @@ class PostController extends Controller
         $post->save();
 
         return back()->with('success', 'وضعیت مقاله با موفقیت تغییر کرد.');
+    }
+
+    /**
+     * تغییر وضعیت گروهی مقالات
+     */
+    public function bulkChangeStatus(Request $request)
+    {
+        $request->validate([
+            'posts' => 'required|array',
+            'posts.*' => 'exists:posts,id',
+            'status' => 'required|in:draft,published,archived'
+        ]);
+
+        $user = Auth::user();
+        
+        // فقط مقالات متعلق به کاربر
+        Post::where('user_id', $user->id)
+            ->whereIn('id', $request->posts)
+            ->update(['status' => $request->status]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'وضعیت مقالات با موفقیت تغییر کرد.'
+        ]);
+    }
+
+    /**
+     * حذف گروهی مقالات
+     */
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'posts' => 'required|array',
+            'posts.*' => 'exists:posts,id'
+        ]);
+
+        $user = Auth::user();
+        
+        // فقط مقالات متعلق به کاربر
+        Post::where('user_id', $user->id)
+            ->whereIn('id', $request->posts)
+            ->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'مقالات با موفقیت حذف شدند.'
+        ]);
     }
 }
