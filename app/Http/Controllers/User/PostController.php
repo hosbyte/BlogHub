@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
+use App\Models\Media;
 
 class PostController extends Controller
 {
@@ -84,7 +86,7 @@ class PostController extends Controller
         $categories = Category::all();
         $tags = Tag::all();
 
-        return view('user.posts.create' , compact('categories' , 'tag'));
+        return view('user.posts.create' , compact('categories' , 'tags'));
     }
 
     /**
@@ -95,7 +97,90 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // اعتبارسنجی
+        $validated = $request->validate([
+            'title' => 'required|string|max:200',
+            'slug' => 'required|string|max:200|unique:posts,slug',
+            'content' => 'required|string|min:10',
+            'excerpt' => 'nullable|string|max:300',
+            'category_id' => 'required|exists:categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'status' => 'required|in:draft,published',
+            'is_featured' => 'boolean',
+            'meta_title' => 'nullable|string|max:60',
+            'meta_description' => 'nullable|string|max:160',
+            'meta_keywords' => 'nullable|string|max:255',
+            'published_at' => 'nullable|date',
+            'allow_comments' => 'boolean',
+            'include_in_rss' => 'boolean',
+        ]);
+
+        // آپلود تصویر شاخص
+        if($request->hasFile('thumbnail'))
+        {
+            $path = $request->file('thumbnail')->store('thumbnails' , 'public');
+
+            // ایجاد رکورد media
+            $media = Media::create([
+                'name' => $request->file('thumbnail')->getClientOriginalName(),
+                'path' => $path,
+                'type' => 'image',
+                'size' => $request->file('thumbnail')->getSize(),
+                'user_id' => Auth::id(),
+            ]);
+
+            $validated ['thumbnail_id'] = $media->id; 
+        }
+
+        // ایجاد مقاله
+        $post = Post::create([
+            'title' => $validated['title'],
+            'slug' => $validated['slug'],
+            'content' => $validated['content'],
+            'excerpt' => $validated['excerpt'] ?? null,
+            'user_id' => Auth::id(),
+            'category_id' => $validated['category_id'],
+            'thumbnail_id' => $validated['thumbnail_id'] ?? null,
+            'status' => $validated['status'],
+            'is_featured' => $request->boolean('is_featured'),
+            'meta_title' => $validated['meta_title'] ?? null,
+            'meta_description' => $validated['meta_description'] ?? null,
+            'meta_keywords' => $validated['meta_keywords'] ?? null,
+            'published_at' => $validated['status'] === 'published' 
+                ? ($validated['published_at'] ?? now()) 
+                : null,
+            'allow_comments' => $request->boolean('allow_comments'),
+            'view_count' => 0,
+        ]);
+
+        // افزودن برچسب‌ها
+        if ($request->has('tags')) 
+        {
+            $post->tags()->attach($request->tags);
+        }
+
+        // لاگ فعالیت
+        Activity::create([
+            'user_id' => Auth::id(),
+            'action' => 'create_post',
+            'description' => 'مقاله جدید ایجاد کرد: ' . $post->title,
+        ]);
+
+         // ریدایرکت بر اساس action
+        $action = $request->input('action', 'draft');
+        
+        if ($action === 'draft') 
+        {
+            return redirect()->route('user.posts.index')
+                ->with('success', 'مقاله با موفقیت به عنوان پیش‌نویس ذخیره شد.');
+        } 
+        else 
+        {
+            return redirect()->route('posts.show', $post->slug)
+                ->with('success', 'مقاله با موفقیت منتشر شد.');
+        }
     }
 
     /**

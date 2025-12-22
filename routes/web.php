@@ -48,6 +48,7 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
     // مقالات کاربر
     Route::get('/posts' , [UserPostController::class , 'index'])->name('posts.index');
     Route::get('/posts/create' , [UserPostController::class , 'create'])->name('posts.create');
+    Route::post('/posts', [UserPostController::class, 'store'])->name('posts.store');  
     Route::get('/posts/{post}/edit' , [UserPostController::class , 'edit'])->name('posts.edit');
     Route::delete('/posts/{post}' , [UserPostController::class , 'destroy'])->name('posts.destroy');
     Route::post('/posts/{post}/status' , [UserPostController::class , 'changeStatus'])->name('posts.change-status');
