@@ -7,6 +7,13 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'BlogHub') | سیستم مدیریت وبلاگ چندکاربره</title>
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Samim&display=swap"
+        rel="stylesheet">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,22 +62,22 @@
                 </li>
 
                 {{-- <li><a href="{{ route('posts.popular') }}" class="nav-link"> --}}
-                        <i class="fas fa-fire"></i> پربازدیدها
-                    </a></li>
+                <i class="fas fa-fire"></i> پربازدیدها
+                </a></li>
 
                 {{-- <li><a href="{{ route('about') }}" class="nav-link"> --}}
-                        <i class="fas fa-info-circle"></i> درباره ما
-                    </a></li>
+                {{-- <i class="fas fa-info-circle"></i> درباره ما
+                </a></li> --}}
             </ul>
 
             <!-- بخش جستجو -->
             <div class="search-container">
                 {{-- <form action="{{ route('search') }}" method="GET" class="search-form"> --}}
-                    <input type="text" name="q" placeholder="جستجو مقالات..." class="search-input">
-                    <button type="submit" class="search-btn">
-                        <i class="fas fa-search"></i>
-                    </button>
-                </form>
+                <input type="text" name="q" placeholder="جستجو مقالات..." class="search-input">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+                {{-- </form> --}}
             </div>
 
             <!-- بخش کاربر -->
@@ -106,10 +113,12 @@
                             <a href="{{ route('user.dashboard') }}" class="dropdown-item">
                                 <i class="fas fa-user-circle"></i> پنل کاربری
                             </a>
-                            <a href="{{ route('user.posts') }}" class="dropdown-item">
+                            <!-- اصلاح شده: user.posts.index -->
+                            <a href="{{ route('user.posts.index') }}" class="dropdown-item">
                                 <i class="fas fa-newspaper"></i> مقالات من
                             </a>
-                            <a href="{{ route('user.profile') }}" class="dropdown-item">
+                            <!-- اصلاح شده: user.profile.edit -->
+                            <a href="{{ route('user.profile.edit') }}" class="dropdown-item">
                                 <i class="fas fa-cog"></i> تنظیمات پروفایل
                             </a>
                             <hr class="dropdown-divider">
@@ -170,8 +179,10 @@
                 @endif
 
                 <li><a href="{{ route('user.dashboard') }}"><i class="fas fa-user-circle"></i> پنل کاربری</a></li>
-                <li><a href="{{ route('user.posts') }}"><i class="fas fa-newspaper"></i> مقالات من</a></li>
-                <li><a href="{{ route('user.profile') }}"><i class="fas fa-cog"></i> تنظیمات پروفایل</a></li>
+                <!-- اصلاح شده: user.posts.index -->
+                <li><a href="{{ route('user.posts.index') }}"><i class="fas fa-newspaper"></i> مقالات من</a></li>
+                <!-- اصلاح شده: user.profile.edit -->
+                <li><a href="{{ route('user.profile.edit') }}"><i class="fas fa-cog"></i> تنظیمات پروفایل</a></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf

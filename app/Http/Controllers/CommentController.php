@@ -45,20 +45,21 @@ class CommentController extends Controller
         ]);
 
         // 2. بررسی وجود مقاله
-        $post = Post::findRoFail($request->post_id);
+        $post = Post::findOrFail($request->post_id);
 
         // 3. ایجاد نظر در دیتابیس
         $comment = Comment::create([
             'content' => $validated['content'],
             'user_id' => Auth::id(), // کاربر لاگین کرده
             'post_id' => $validated['post_id'],
-            'parent_id' => $validated['parent_id'],
+            // 'parent_id' => $validated['parent_id'],
+            'parent_id' => $validated['parent_id'] ?? null, // این خط را اصلاح کنید
             'status' => 'pending'
         ]);
 
         // 4. هدایت به صفحه مقاله با اسکرول به بخش نظرات
         return redirect()
-            ->route('post.show' , $post->slug)
+            ->route('posts.show' , $post->slug)
             ->with('success', 'نظر شما با موفقیت ثبت شد و پس از تایید نمایش داده می‌شود.')
             ->withFragment('comments-section');
     }

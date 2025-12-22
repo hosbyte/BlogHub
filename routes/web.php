@@ -2,9 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PostController;
+use App\Http\Controllers\PostController as FrontPostController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\User\DashboardController;
+use App\Http\Controllers\User\ProfileController;
+use App\Http\Controllers\User\PostController as UserPostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,28 +20,44 @@ use App\Http\Controllers\CommentController;
 |
 */
 
-// auth route
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-require __DIR__.'/auth.php';
-
 // صفحه اصلی
 Route::get('/' , [HomeController::class , 'index'])->name('home');
 
 //مقالات
-Route::get('/posts' , [PostController::class , 'index'])->name('posts.index');
-Route::get('/posts/{slug}' , [PostController::class , 'show'])->name('posts.show');
+Route::get('/posts' , [FrontPostController::class , 'index'])->name('posts.index');
+Route::get('/posts/{slug}' , [FrontPostController::class , 'show'])->name('posts.show');
+
+// نظرات (نیاز به auth)
 Route::middleware('auth')->group(function () {
     Route::post('/comments' , [CommentController::class , 'store'])->name('comments.store');
     Route::delete('/comments/{comment}' , [CommentController::class , 'destroy'])->name('comments.destroy');
 });
 
-
 // دسته بندی
 Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
 
+// پنل کاربری
+Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
+    // داشبورد
+    Route::get('/dashboard' , [DashboardController::class , 'index'])->name('dashboard');
 
+    // پروفایل
+    Route::get('/profile' , [ProfileController::class , 'edit'])->name('profile.edit');
+    Route::put('/profile' , [ProfileController::class , 'update'])->name('profile.update');
+
+    // مقالات کاربر
+    Route::get('/posts' , [UserPostController::class , 'index'])->name('posts.index');
+    Route::get('/posts/create' , [UserPostController::class , 'create'])->name('posts.create');
+    Route::get('/posts/{post}/edit' , [UserPostController::class , 'edit'])->name('posts.edit');
+    Route::delete('/posts/{post}' , [UserPostController::class , 'destroy'])->name('posts.destroy');
+    Route::post('/posts/{post}/status' , [UserPostController::class , 'changeStatus'])->name('posts.change-status');
+});
+
+// auth route
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('breeze.dashboard');
+require __DIR__.'/auth.php';
 
 
 

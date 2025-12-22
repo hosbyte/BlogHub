@@ -1,4 +1,3 @@
-{{-- این فایل به صورت بازگشتی برای نمایش نظرات و پاسخ‌هایشان فراخوانی می‌شود --}}
 <div class="comment mb-6 p-4 border rounded-lg" data-comment-id="{{ $comment->id }}">
     {{-- هدر نظر --}}
     <div class="comment-header flex items-center justify-between mb-2">
@@ -28,7 +27,7 @@
     @if ($comment->replies && $comment->replies->count() > 0)
         <div class="comment-replies ml-8 pl-4 border-l-2 border-gray-200">
             @foreach ($comment->replies as $reply)
-                @include('posts.partials._comment', ['comment' => $reply])
+                @include('front.posts.partials._comment', ['comment' => $reply])
             @endforeach
         </div>
     @endif

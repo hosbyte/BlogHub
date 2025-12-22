@@ -329,6 +329,77 @@
             color: #2d3047;
         }
 
+        .comment {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .comment-user {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comment-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-meta {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comment-author {
+            font-weight: 600;
+            color: #2d3047;
+        }
+
+        .comment-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+
+        .comment-content {
+            color: #495057;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .comment-replies {
+            margin-right: 40px;
+            margin-top: 20px;
+            padding-right: 20px;
+            border-right: 2px solid #e9ecef;
+        }
+
+        .reply-btn {
+            background: none;
+            border: none;
+            color: #4361ee;
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .reply-btn:hover {
+            background: rgba(67, 97, 238, 0.1);
+        }
+
         @media (max-width: 768px) {
             .article-title {
                 font-size: 1.8rem;
@@ -382,7 +453,7 @@
 
                 <div class="meta-item">
                     <i class="far fa-calendar"></i>
-                    {{-- <span>انتشار: {{ $post->published_at ? $post->published_at->jdate('Y/m/d') : 'بدون تاریخ' }}</span> --}}
+                    <span>انتشار: {{ $post->created_at->diffForHumans() }}</span>
                 </div>
 
                 <div class="meta-item">
@@ -401,32 +472,42 @@
     <div class="article-container">
         <!-- اطلاعات نویسنده -->
         <div class="author-info">
-            {{-- <img src="{{ $post->user->avatar_url }}" alt="{{ $post->user->name }}" class="author-avatar"> --}}
+            @if ($post->user->avatar)
+                <img src="{{ asset('storage/' . $post->user->avatar) }}" alt="{{ $post->user->name }}"
+                    class="author-avatar">
+            @else
+                <div class="author-avatar"
+                    style="background: #4361ee; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                    {{ substr($post->user->name, 0, 1) }}
+                </div>
+            @endif
             <div class="author-details">
                 <h4>{{ $post->user->name }}</h4>
                 @if ($post->user->bio)
                     <p>{{ $post->user->bio }}</p>
                 @endif
                 <div style="display: flex; gap: 10px;">
-                    {{-- <a href="{{ route('author.profile', $post->user->id) }}" class="btn btn-sm btn-outline"> --}}
-                    <i class="fas fa-user"></i> پروفایل نویسنده
+                    <a href="#" class="btn btn-sm btn-outline">
+                        <i class="fas fa-user"></i> پروفایل نویسنده
                     </a>
-                    {{-- <a href="{{ route('posts.index', ['author' => $post->user->id]) }}" class="btn btn-sm btn-outline"> --}}
-                    <i class="fas fa-newspaper"></i> مقالات دیگر
+                    <a href="#" class="btn btn-sm btn-outline">
+                        <i class="fas fa-newspaper"></i> مقالات دیگر
                     </a>
                 </div>
             </div>
         </div>
 
         <!-- تصویر شاخص -->
-        <div class="article-thumbnail">
-            <img src="{{ $post->thumbnail_url }}" alt="{{ $post->title }}">
-            @if ($post->is_featured)
-                <span class="featured-badge-article">
-                    <i class="fas fa-star"></i> مقاله ویژه
-                </span>
-            @endif
-        </div>
+        @if ($post->thumbnail)
+            <div class="article-thumbnail">
+                <img src="{{ asset('storage/' . $post->thumbnail->path) }}" alt="{{ $post->title }}">
+                @if ($post->is_featured)
+                    <span class="featured-badge-article">
+                        <i class="fas fa-star"></i> مقاله ویژه
+                    </span>
+                @endif
+            </div>
+        @endif
 
         <!-- محتوای مقاله -->
         <article class="article-content">
@@ -449,12 +530,12 @@
         <div class="article-actions">
             <button class="action-btn like-btn" data-post-id="{{ $post->id }}">
                 <i class="far fa-thumbs-up"></i>
-                <span class="like-count">{{ $post->likes_count }}</span>
+                <span class="like-count">{{ $post->likes_count ?? 0 }}</span>
             </button>
 
             <button class="action-btn dislike-btn" data-post-id="{{ $post->id }}">
                 <i class="far fa-thumbs-down"></i>
-                <span class="dislike-count">{{ $post->dislikes_count }}</span>
+                <span class="dislike-count">{{ $post->dislikes_count ?? 0 }}</span>
             </button>
 
             <button class="action-btn" onclick="copyArticleLink()">
@@ -472,33 +553,19 @@
             </a>
         </div>
 
-        <!-- مقالات مرتبط -->
-        @if ($relatedPosts->count() > 0)
-            <section class="related-articles">
-                <h2 class="related-title">
-                    <i class="fas fa-link"></i> مقالات مرتبط
-                </h2>
-                <div class="posts-grid">
-                    @foreach ($relatedPosts as $relatedPost)
-                        @include('front.posts.partials.post-card', ['post' => $relatedPost])
-                    @endforeach
-                </div>
-            </section>
-        @endif
-
         <!-- بخش نظرات -->
         <section class="comments-section">
             <h2 class="comments-title">
                 <i class="far fa-comments"></i> نظرات
                 <small style="font-size: 1rem; color: #6c757d; margin-right: 10px;">
-                    ({{ $comments->count() }} نظر)
+                    ({{ $post->comments->where('status', 'approved')->count() }} نظر)
                 </small>
             </h2>
 
-            @if ($comments->count() > 0)
+            @if ($post->comments->where('status', 'approved')->count() > 0)
                 <div class="comments-list">
-                    @foreach ($comments as $comment)
-                        @include('front.comments.partials.comment-item', ['comment' => $comment])
+                    @foreach ($post->comments->where('status', 'approved')->whereNull('parent_id') as $comment)
+                        @include('front.posts.partials._comment', ['comment' => $comment])
                     @endforeach
                 </div>
             @else
@@ -513,12 +580,22 @@
             @auth
                 <div class="comment-form-section">
                     <h3 class="form-title">ثبت نظر جدید</h3>
-                    <form action="{{ route('comments.store') }}" method="POST">
+                    <form action="{{ route('comments.store') }}" method="POST" id="comment-form">
                         @csrf
                         <input type="hidden" name="post_id" value="{{ $post->id }}">
+                        <input type="hidden" name="parent_id" id="parent_id" value="">
+
+                        <div class="reply-to mb-3" id="reply-to-container" style="display: none;">
+                            <div class="inline-flex items-center bg-blue-50 px-3 py-1 rounded">
+                                <span class="text-sm text-blue-700">در پاسخ به <strong id="reply-to-name"></strong></span>
+                                <button type="button" id="cancel-reply" class="mr-2 text-blue-500 hover:text-blue-700"
+                                    style="background: none; border: none; cursor: pointer;">× لغو</button>
+                            </div>
+                        </div>
 
                         <div style="margin-bottom: 15px;">
-                            <textarea name="content" rows="4" class="filter-input" placeholder="نظر خود را بنویسید..." required></textarea>
+                            <textarea name="content" id="comment-content" rows="4" class="form-control" placeholder="نظر خود را بنویسید..."
+                                required></textarea>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -542,116 +619,9 @@
             @endauth
         </section>
     </div>
-
-    {{-- بخش نظرات --}}
-    <section class="mt-12" id="comments-section">
-        <h2 class="text-2xl font-bold mb-6">نظرات ({{ $post->comments->where('status', 'approved')->count() }})</h2>
-
-        {{-- لیست نظرات تاییدشده --}}
-        <div class="comments-list mb-8">
-            @foreach ($post->comments->where('status', 'approved')->whereNull('parent_id') as $comment)
-                @include('posts.partials._comment', ['comment' => $comment])
-            @endforeach
-
-            @if ($post->comments->where('status', 'approved')->count() == 0)
-                <p class="text-gray-500 text-center py-4">هنوز نظری ثبت نشده. اولین نظر را شما بدهید!</p>
-            @endif
-        </div>
-
-        {{-- فرم ارسال نظر --}}
-        @auth
-            <div class="comment-form bg-gray-50 p-6 rounded-lg">
-                <h3 class="text-lg font-semibold mb-4">دیدگاه شما</h3>
-                <form action="{{ route('comments.store') }}" method="POST" id="comment-form">
-                    @csrf
-                    <input type="hidden" name="post_id" value="{{ $post->id }}">
-                    <input type="hidden" name="parent_id" id="parent_id" value="">
-
-                    {{-- نمایش پاسخ به چه کسی --}}
-                    <div class="reply-to mb-3 hidden" id="reply-to-container">
-                        <div class="inline-flex items-center bg-blue-50 px-3 py-1 rounded">
-                            <span class="text-sm text-blue-700">در پاسخ به <strong id="reply-to-name"></strong></span>
-                            <button type="button" id="cancel-reply" class="mr-2 text-blue-500 hover:text-blue-700">×
-                                لغو</button>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <textarea name="content" id="comment-content" rows="4"
-                            class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-blue-300 focus:border-blue-500"
-                            placeholder="نظر خود را بنویسید..." required></textarea>
-                        @error('content')
-                            <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
-                        @enderror
-                    </div>
-
-                    <div class="flex justify-end">
-                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded transition">
-                            ارسال نظر
-                        </button>
-                    </div>
-                </form>
-            </div>
-        @else
-            <div class="bg-yellow-50 p-4 rounded text-center">
-                <p class="text-gray-700">
-                    برای ارسال نظر باید
-                    <a href="{{ route('login') }}" class="text-blue-600 hover:underline">وارد حساب کاربری</a>
-                    شوید یا
-                    <a href="{{ route('register') }}" class="text-blue-600 hover:underline">ثبت‌نام</a>
-                    کنید.
-                </p>
-            </div>
-        @endauth
-    </section>
 @endsection
 
 @section('scripts')
-    {{-- JavaScript برای پاسخ‌گویی --}}
-    @auth
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                // تنظیم پاسخ
-                document.querySelectorAll('.reply-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const commentId = this.dataset.commentId;
-                        const commentElement = document.querySelector(
-                            `.comment[data-comment-id="${commentId}"]`);
-                        const userName = commentElement.querySelector('.comment-header strong')
-                            .textContent;
-
-                        // پر کردن فیلدهای مخفی
-                        document.getElementById('parent_id').value = commentId;
-                        document.getElementById('reply-to-name').textContent = userName;
-                        document.getElementById('reply-to-container').classList.remove('hidden');
-
-                        // اسکرول به فرم
-                        document.getElementById('comment-form').scrollIntoView({
-                            behavior: 'smooth'
-                        });
-                        document.getElementById('comment-content').focus();
-                    });
-                });
-
-                // لغو پاسخ
-                document.getElementById('cancel-reply')?.addEventListener('click', function() {
-                    document.getElementById('parent_id').value = '';
-                    document.getElementById('reply-to-container').classList.add('hidden');
-                    document.getElementById('comment-content').focus();
-                });
-
-                // ارسال فرم (می‌توانید Ajax کنید)
-                document.getElementById('comment-form')?.addEventListener('submit', function(e) {
-                    // اعتبارسنجی سمت کلاینت
-                    const content = document.getElementById('comment-content').value.trim();
-                    if (!content) {
-                        e.preventDefault();
-                        alert('لطفا متن نظر را وارد کنید.');
-                    }
-                });
-            });
-        </script>
-    @endauth
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             console.log('صفحه مقاله لود شد');
@@ -664,93 +634,42 @@
                 });
             };
 
-            // سیستم لایک/دیسلایک
-            const likeBtn = document.querySelector('.like-btn');
-            const dislikeBtn = document.querySelector('.dislike-btn');
+            // سیستم پاسخ به نظرات
+            document.querySelectorAll('.reply-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const commentId = this.dataset.commentId;
+                    const commentElement = document.querySelector(
+                        `.comment[data-comment-id="${commentId}"]`);
+                    const userName = commentElement.querySelector('.comment-author').textContent;
 
-            if (likeBtn && dislikeBtn) {
-                likeBtn.addEventListener('click', function() {
-                    const postId = this.dataset.postId;
-                    likePost(postId);
-                });
+                    // پر کردن فیلدهای مخفی
+                    document.getElementById('parent_id').value = commentId;
+                    document.getElementById('reply-to-name').textContent = userName;
+                    document.getElementById('reply-to-container').style.display = 'block';
 
-                dislikeBtn.addEventListener('click', function() {
-                    const postId = this.dataset.postId;
-                    dislikePost(postId);
-                });
-            }
-
-            // اسکرول نرم به بخش‌ها
-            const smoothScroll = (target) => {
-                const element = document.querySelector(target);
-                if (element) {
-                    element.scrollIntoView({
+                    // اسکرول به فرم
+                    document.getElementById('comment-form').scrollIntoView({
                         behavior: 'smooth'
                     });
-                }
-            };
+                    document.getElementById('comment-content').focus();
+                });
+            });
 
-            // هایلایت کدها
-            document.querySelectorAll('pre code').forEach((block) => {
-                hljs.highlightBlock(block);
+            // لغو پاسخ
+            document.getElementById('cancel-reply')?.addEventListener('click', function() {
+                document.getElementById('parent_id').value = '';
+                document.getElementById('reply-to-container').style.display = 'none';
+                document.getElementById('comment-content').focus();
+            });
+
+            // ارسال فرم
+            document.getElementById('comment-form')?.addEventListener('submit', function(e) {
+                const content = document.getElementById('comment-content').value.trim();
+                if (!content) {
+                    e.preventDefault();
+                    alert('لطفا متن نظر را وارد کنید.');
+                }
             });
         });
-
-        // توابع لایک/دیسلایک
-        function likePost(postId) {
-            fetch(`/posts/${postId}/like`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector('.like-count').textContent = data.likes;
-                        document.querySelector('.dislike-count').textContent = data.dislikes;
-
-                        // تغییر استایل دکمه‌ها
-                        document.querySelector('.like-btn').classList.add('liked');
-                        document.querySelector('.dislike-btn').classList.remove('disliked');
-                    }
-                });
-        }
-
-        function dislikePost(postId) {
-            fetch(`/posts/${postId}/dislike`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector('.like-count').textContent = data.likes;
-                        document.querySelector('.dislike-count').textContent = data.dislikes;
-
-                        // تغییر استایل دکمه‌ها
-                        document.querySelector('.dislike-btn').classList.add('disliked');
-                        document.querySelector('.like-btn').classList.remove('liked');
-                    }
-                });
-        }
-
-        // تخمین زمان مطالعه
-        function estimateReadingTime(content) {
-            const wordsPerMinute = 200;
-            const wordCount = content.trim().split(/\s+/).length;
-            return Math.ceil(wordCount / wordsPerMinute);
-        }
-    </script>
-
-    <!-- هایلایت سینتکس (اختیاری) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
-    <script>
-        hljs.highlightAll();
     </script>
 @endsection

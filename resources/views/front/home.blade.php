@@ -70,7 +70,7 @@
                     <i class="fas fa-newspaper"></i> مشاهده مقالات
                 </a>
                 @auth
-                    <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-lg">
+                    {{-- <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-lg"> --}}
                         <i class="fas fa-tachometer-alt"></i> پنل کاربری
                     </a>
                 @else
