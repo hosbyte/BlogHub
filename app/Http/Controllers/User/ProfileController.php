@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers\User;
 
+// use App\Http\Controllers\Controller;
+// use Illuminate\Http\Request;
+// use Illuminate\Support\Facades\Auth;
+// use Illuminate\Support\Facades\Hash;
+// use Illuminate\Validation\Rule;
+// use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User; // این خط را اضافه کنید
 
 class ProfileController extends Controller
 {
@@ -74,7 +81,13 @@ class ProfileController extends Controller
      */
     public function update(Request $request)
     {
-        $user = Auth::user();
+        // دریافت کاربر به عنوان مدل Eloquent
+        $user = User::find(Auth::id());
+
+        if (!$user)
+        {
+            return redirect()->back()->with('error', 'کاربر یافت نشد.');
+        }
 
         // اعتبارسنجی
         $validated = $request->validate([
@@ -121,7 +134,7 @@ class ProfileController extends Controller
         }
 
         $user->save();
-        
+
         return redirect()->route('user.profile.edit')->with('success', 'پروفایل با موفقیت بروزرسانی شد.');
     }
 
