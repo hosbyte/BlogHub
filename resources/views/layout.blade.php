@@ -17,15 +17,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Samim&display=swap"
         rel="stylesheet">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Samim&display=swap"
-        rel="stylesheet">
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
 
@@ -63,24 +54,14 @@
                         <li><a href="#" class="loading-categories">در حال بارگذاری...</a></li>
                     </ul>
                 </li>
-
-                {{-- <li><a href="{{ route('posts.popular') }}" class="nav-link"> --}}
-                <i class="fas fa-fire"></i> پربازدیدها
-                </a></li>
-
-                {{-- <li><a href="{{ route('about') }}" class="nav-link"> --}}
-                {{-- <i class="fas fa-info-circle"></i> درباره ما
-                </a></li> --}}
             </ul>
 
             <!-- بخش جستجو -->
             <div class="search-container">
-                {{-- <form action="{{ route('search') }}" method="GET" class="search-form"> --}}
                 <input type="text" name="q" placeholder="جستجو مقالات..." class="search-input">
                 <button type="submit" class="search-btn">
                     <i class="fas fa-search"></i>
                 </button>
-                {{-- </form> --}}
             </div>
 
             <!-- بخش کاربر -->
@@ -116,11 +97,9 @@
                             <a href="{{ route('user.dashboard') }}" class="dropdown-item">
                                 <i class="fas fa-user-circle"></i> پنل کاربری
                             </a>
-                            <!-- اصلاح شده: user.posts.index -->
                             <a href="{{ route('user.posts.index') }}" class="dropdown-item">
                                 <i class="fas fa-newspaper"></i> مقالات من
                             </a>
-                            <!-- اصلاح شده: user.profile.edit -->
                             <a href="{{ route('user.profile.edit') }}" class="dropdown-item">
                                 <i class="fas fa-cog"></i> تنظیمات پروفایل
                             </a>
@@ -158,9 +137,6 @@
         </div>
         <ul class="mobile-nav">
             <li><a href="{{ route('home') }}"><i class="fas fa-home"></i> صفحه اصلی</a></li>
-            {{-- <li><a href="{{ route('categories.index') }}"><i class="fas fa-th-large"></i> دسته‌بندی‌ها</a></li> --}}
-            {{-- <li><a href="{{ route('posts.popular') }}"><i class="fas fa-fire"></i> پربازدیدها</a></li> --}}
-            {{-- <li><a href="{{ route('about') }}"><i class="fas fa-info-circle"></i> درباره ما</a></li> --}}
 
             @auth
                 <li class="mobile-user-info">
@@ -182,9 +158,7 @@
                 @endif
 
                 <li><a href="{{ route('user.dashboard') }}"><i class="fas fa-user-circle"></i> پنل کاربری</a></li>
-                <!-- اصلاح شده: user.posts.index -->
                 <li><a href="{{ route('user.posts.index') }}"><i class="fas fa-newspaper"></i> مقالات من</a></li>
-                <!-- اصلاح شده: user.profile.edit -->
                 <li><a href="{{ route('user.profile.edit') }}"><i class="fas fa-cog"></i> تنظیمات پروفایل</a></li>
                 <li>
                     <form method="POST" action="{{ route('logout') }}">
@@ -233,11 +207,7 @@
                     <h3 class="footer-title">لینک‌های سریع</h3>
                     <ul class="footer-links">
                         <li><a href="{{ route('home') }}"><i class="fas fa-chevron-left"></i> صفحه اصلی</a></li>
-                        {{-- <li><a href="{{ route('posts.popular') }}"><i class="fas fa-chevron-left"></i> پربازدیدها</a> --}}
-                        </li>
                         <li><a href="{{ route('posts.index') }}"><i class="fas fa-chevron-left"></i> همه مقالات</a>
-                        </li>
-                        {{-- <li><a href="{{ route('authors.index') }}"><i class="fas fa-chevron-left"></i> نویسندگان</a> --}}
                         </li>
                     </ul>
                 </div>
@@ -246,7 +216,6 @@
                 <div class="footer-section">
                     <h3 class="footer-title">دسته‌بندی‌ها</h3>
                     <ul class="footer-links category-links">
-                        <!-- با JavaScript لود می‌شوند -->
                         <li><a href="#" class="loading">در حال بارگذاری...</a></li>
                     </ul>
                 </div>
@@ -274,12 +243,23 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <script src="{{ asset('js/main.js') }}"></script>
+    <!-- ========== JavaScript Libraries ========== -->
+    <!-- jQuery 3.6.0 (اولین کتابخانه) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-    <!-- Script برای لود دسته‌بندی‌ها -->
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <!-- فایل اصلی JS (اگر وجود دارد) -->
+    @if (file_exists(public_path('js/main.js')))
+        <script src="{{ asset('js/main.js') }}"></script>
+    @endif
+
+    <!-- Scripts داخلی -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
+            console.log('BlogHub loaded successfully with jQuery ' + $.fn.jquery);
+
             // لود دسته‌بندی‌ها برای منو و فوتر
             fetchCategories();
 
@@ -366,8 +346,6 @@
             }
         }
     </script>
-    <!-- Select2 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     @yield('scripts')
 </body>
