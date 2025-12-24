@@ -265,4 +265,14 @@ class Post extends Model
             ->where('type', 'dislike')
             ->count();
     }
+
+
+    public function scopeAvailable($query)
+    {
+        return $query->where('status', 'published')
+            ->where(function($q) {
+                $q->where('published_at', '<=', now())
+                ->orWhereNull('published_at');
+            });
+    }
 }

@@ -18,13 +18,17 @@ class HomeController extends Controller
     {
         $data = [
             // مقالات ویژه - از Post
-            'featuredPosts' => Post::published()->featured()->limit(3)->get(),
+            // 'featuredPosts' => Post::published()->featured()->limit(3)->get(),
             // مقالات اخیر - از Post
-            'recentPosts' => Post::published()->recent(6)->get(),
+            // 'recentPosts' => Post::published()->recent(6)->get(),
             // مقالات پربازدید - از Post
             'popularPosts' => Post::published()->popular(5)->get(),
-             // دسته‌بندی‌ها - از Category (بدون published!)
+            // دسته‌بندی‌ها - از Category (بدون published!)
             'categories' => Category::hasPosts()->mainCategories()->get(),
+            //مقالات ویژه - از Post
+            'featuredPosts' => Post::available()->featured()->limit(3)->get(),
+            //مقالات اخیر - از Post
+            'recentPosts' => Post::available()->recent(6)->get(),
         ];
 
         return view('front.home' , $data);

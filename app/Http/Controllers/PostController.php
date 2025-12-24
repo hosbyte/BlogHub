@@ -23,6 +23,7 @@ class PostController extends Controller
 
         // شروع query
         $query = Post::published();
+        // $query = Post::available();
 
         // اعمال جستجو
         if($search)
@@ -111,35 +112,6 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    // public function show($slug)
-    // {
-    //     $post = Post::where('slug' , $slug)->firstOrFail();
-
-    //     // افزایش تعداد بازدید
-    //     $post->increment('view_count');
-
-    //     // مقالات مرتبط
-    //     $relatedPosts = Post::published()
-    //         ->where('category_id' , $post->category_id)
-    //         ->where('id' , '!=' , $post->id)
-    //         ->limit(3)
-    //         ->get();
-
-    //     // نظرات مقاله
-    //     $comments = $post->comment()
-    //         ->where('status' , 'approved')
-    //         ->whereNull('parent_id')
-    //         ->with('replies')
-    //         ->latest()
-    //         ->get();
-
-
-    //     return view('front.posts.show' , compact(
-    //         'post',
-    //         'relatedPosts',
-    //         'comments'
-    //     ));
-    // }
     public function show($slug)
 {
     $post = Post::where('slug', $slug)
