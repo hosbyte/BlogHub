@@ -1,115 +1,858 @@
 @extends('layout')
 
-@section('title', 'ایجاد مقاله جدید - BlogHub')
+@section('title', 'ایجاد مقاله جدید - بلاگ‌هاب')
 
 @section('styles')
+    {{-- <link rel="stylesheet" href="{{ asset('css/select2.min.css') }}"> --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="{{ asset('css/post-form.css') }}">
+    <style>
+        /* استایل‌های ضروری */
+        .form-section-card {
+            display: none;
+        }
+
+        .form-section-card.active-section {
+            display: block;
+        }
+
+        /* استایل ویرایشگر */
+        .editor-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .ql-toolbar.ql-snow {
+            border-radius: 12px 12px 0 0 !important;
+            border: 2px solid #e0e3ff !important;
+            background: linear-gradient(135deg, #f8f9ff, #f1f3ff) !important;
+        }
+
+        .ql-container.ql-snow {
+            border-radius: 0 0 12px 12px !important;
+            border: 2px solid #e0e3ff !important;
+            border-top: none !important;
+            font-family: 'Vazirmatn', sans-serif !important;
+            min-height: 350px;
+            font-size: 16px;
+        }
+
+        .ql-editor {
+            min-height: 300px;
+            font-family: 'Vazirmatn', sans-serif !important;
+            line-height: 1.8;
+            text-align: right;
+            direction: rtl;
+        }
+
+        .ql-snow .ql-picker-label,
+        .ql-snow .ql-stroke {
+            color: #495057 !important;
+        }
+
+        /* استایل alert */
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: slideIn 0.4s ease;
+            border-right: 4px solid;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #fff5f5, #ffe3e3);
+            color: #721c24;
+            border-color: #f72585;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border-color: #198754;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            to {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+        }
+    </style>
 @endsection
 
 @section('content')
-    <div class="post-form-container">
-        <div class="post-form-header">
-            <h1 class="post-form-title">
-                <i class="fas fa-plus-circle"></i> ایجاد مقاله جدید
-            </h1>
-            <a href="{{ route('user.posts.index') }}" class="back-to-posts">
-                <i class="fas fa-arrow-left"></i> بازگشت به مقالات
+    <div class="post-create-container">
+        <!-- هدر صفحه -->
+        <div class="post-create-header">
+            <div class="header-left">
+                <h1 class="post-create-title">
+                    <i class="fas fa-plus-circle"></i>
+                    ایجاد مقاله جدید
+                </h1>
+                <p class="page-subtitle">مقاله خود را با فرم زیر ایجاد و منتشر کنید</p>
+            </div>
+            <a href="{{ route('user.posts.index') }}" class="back-to-list">
+                <i class="fas fa-arrow-right"></i>
+                بازگشت به مقالات
             </a>
         </div>
 
+        <!-- نمایش خطاها -->
         @if ($errors->any())
             <div class="alert alert-danger">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+                <i class="fas fa-exclamation-circle"></i>
+                <div>
+                    <strong>خطاهای زیر رخ داده:</strong>
+                    <ul style="margin: 10px 0 0 20px;">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
             </div>
         @endif
 
-        <!-- فرم تست ساده -->
-        <div style="background: white; padding: 30px; border-radius: 15px; margin-top: 20px;">
-            <h3 style="margin-bottom: 20px;">فرم تست سریع:</h3>
+        @if (session('success'))
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i>
+                {{ session('success') }}
+            </div>
+        @endif
 
-            <form action="{{ route('user.posts.store') }}" method="POST" enctype="multipart/form-data" id="simpleForm">
+        <!-- نوار پیشرفت -->
+        <div class="form-progress-bar">
+            <div class="progress-steps">
+                <div class="progress-step active" data-step="1">
+                    <span class="step-number">۱</span>
+                    <span class="step-text">اطلاعات اصلی</span>
+                </div>
+                <div class="progress-step" data-step="2">
+                    <span class="step-number">۲</span>
+                    <span class="step-text">محتوا</span>
+                </div>
+                <div class="progress-step" data-step="3">
+                    <span class="step-number">۳</span>
+                    <span class="step-text">تنظیمات</span>
+                </div>
+            </div>
+            <div class="progress-indicator">
+                <div class="progress-fill" id="progressFill" style="width: 33%"></div>
+            </div>
+        </div>
+
+        <!-- فرم اصلی -->
+        <div class="create-form-card">
+            <form action="{{ route('user.posts.store') }}" method="POST" enctype="multipart/form-data" id="postForm">
                 @csrf
 
-                <div style="margin-bottom: 15px;">
-                    <label>عنوان مقاله *</label>
-                    <input type="text" name="title" value="{{ old('title', 'مقاله تست') }}"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                <div class="form-content-wrapper">
+                    <!-- بخش ۱: اطلاعات اصلی -->
+                    <div class="form-section-card active-section" id="section1" data-section="1">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div>
+                                <h3 class="section-title">اطلاعات اصلی مقاله</h3>
+                                <p class="section-subtitle">عنوان، توضیح مختصر و دسته‌بندی مقاله</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <!-- فیلد عنوان -->
+                            <div class="form-field">
+                                <label class="field-label">
+                                    <i class="fas fa-heading"></i>
+                                    عنوان مقاله
+                                    <span class="required-star">*</span>
+                                </label>
+                                <input type="text" name="title" class="form-input"
+                                    placeholder="عنوان جذاب و مختصر مقاله خود را وارد کنید" value="{{ old('title') }}"
+                                    required data-counter="60" id="titleInput">
+                                <div class="field-hint">
+                                    <span class="char-count" id="titleCounter">0/60</span>
+                                    <span class="field-tip">عنوان باید جذاب و مرتبط با محتوا باشد</span>
+                                </div>
+                            </div>
+
+                            <!-- فیلد slug -->
+                            <div class="form-field">
+                                <label class="field-label">
+                                    <i class="fas fa-link"></i>
+                                    آدرس مقاله (Slug)
+                                    <span class="required-star">*</span>
+                                </label>
+                                <div class="slug-field-group">
+                                    <span class="slug-prefix">{{ config('app.url') }}/blog/</span>
+                                    <input type="text" name="slug" class="form-input slug-input"
+                                        placeholder="عنوان-انگلیسی-مقاله" value="{{ old('slug') }}" required
+                                        id="slugInput">
+                                </div>
+                                <button type="button" class="generate-slug-btn btn-small" id="generateSlugBtn">
+                                    <i class="fas fa-sync-alt"></i> ایجاد خودکار
+                                </button>
+                            </div>
+
+                            <!-- فیلد دسته‌بندی -->
+                            <div class="form-field">
+                                <label class="field-label">
+                                    <i class="fas fa-folder"></i>
+                                    دسته‌بندی
+                                    <span class="required-star">*</span>
+                                </label>
+                                <select name="category_id" class="form-input" required id="categorySelect">
+                                    <option value="">انتخاب دسته‌بندی</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}"
+                                            {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                        @if ($category->children->count() > 0)
+                                            @foreach ($category->children as $child)
+                                                <option value="{{ $child->id }}"
+                                                    {{ old('category_id') == $child->id ? 'selected' : '' }}>
+                                                    &nbsp;&nbsp;├ {{ $child->name }}
+                                                </option>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- فیلد چکیده -->
+                            <div class="form-field full-width">
+                                <label class="field-label">
+                                    <i class="fas fa-align-left"></i>
+                                    چکیده مقاله
+                                    <span class="required-star">*</span>
+                                </label>
+                                <textarea name="excerpt" class="form-input textarea-field" rows="4"
+                                    placeholder="توضیح مختصر (۱۵۰-۲۰۰ کاراکتر) درباره مقاله خود بنویسید" required data-counter="200"
+                                    id="excerptInput">{{ old('excerpt') }}</textarea>
+                                <div class="field-hint">
+                                    <span class="char-count" id="excerptCounter">0/200</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بخش ۲: محتوای مقاله -->
+                    <div class="form-section-card" id="section2" data-section="2">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-edit"></i>
+                            </div>
+                            <div>
+                                <h3 class="section-title">محتوا و متن مقاله</h3>
+                                <p class="section-subtitle">متن اصلی مقاله خود را با ویرایشگر پیشرفته بنویسید</p>
+                            </div>
+                        </div>
+
+                        <!-- ویرایشگر متن -->
+                        <div class="form-field">
+                            <label class="field-label">
+                                <i class="fas fa-file-alt"></i>
+                                محتوای مقاله
+                                <span class="required-star">*</span>
+                            </label>
+                            <textarea name="content" id="editorContent" style="display: none;">{{ old('content') }}</textarea>
+                            <div id="editorWrapper" class="editor-wrapper"></div>
+                            <div class="field-hint">
+                                <span class="char-count" id="contentCounter">0 کاراکتر، 0 کلمه</span>
+                            </div>
+                        </div>
+
+                        <!-- آپلود تصویر شاخص -->
+                        <div class="form-field">
+                            <label class="field-label">
+                                <i class="fas fa-image"></i>
+                                تصویر شاخص
+                            </label>
+                            <div class="image-upload-area" id="uploadArea">
+                                <div class="upload-icon-wrapper">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                </div>
+                                <div class="upload-text">تصویر شاخص را اینجا رها کنید</div>
+                                <p class="upload-hint">فایل‌های JPG, PNG یا WebP تا ۵ مگابایت</p>
+                                <button type="button" class="upload-button" id="uploadButton">
+                                    <i class="fas fa-search"></i> انتخاب فایل
+                                </button>
+                                <input type="file" name="featured_image" id="featuredImage" class="file-input"
+                                    accept="image/*">
+                            </div>
+                            <div class="image-preview-container" id="previewContainer" style="display: none;">
+                                <div class="preview-wrapper">
+                                    <img id="imagePreview" class="preview-image" src="" alt="پیش‌نمایش">
+                                    <button type="button" class="remove-image-btn" id="removeImageBtn">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- بخش ۳: تنظیمات -->
+                    <div class="form-section-card" id="section3" data-section="3">
+                        <div class="section-header">
+                            <div class="section-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div>
+                                <h3 class="section-title">تنظیمات و انتشار</h3>
+                                <p class="section-subtitle">تنظیمات نهایی و انتشار مقاله</p>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <!-- برچسب‌ها -->
+                            <div class="form-field">
+                                <label class="field-label">
+                                    <i class="fas fa-tags"></i>
+                                    برچسب‌ها
+                                </label>
+                                <select name="tags[]" id="tagsSelect" class="form-input" multiple="multiple">
+                                    @if (old('tags'))
+                                        @foreach (old('tags') as $tag)
+                                            <option value="{{ $tag }}" selected>{{ $tag }}</option>
+                                        @endforeach
+                                    @endif
+                                    <!-- برچسب‌های موجود از دیتابیس -->
+                                    @foreach ($existingTags as $tag)
+                                        <option value="{{ $tag->name }}">{{ $tag->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- وضعیت -->
+                            <div class="form-field">
+                                <label class="field-label">
+                                    <i class="fas fa-globe"></i>
+                                    وضعیت انتشار
+                                </label>
+                                <div class="option-group">
+                                    <label class="option-item">
+                                        <input type="radio" name="status" value="draft"
+                                            {{ old('status', 'draft') == 'draft' ? 'checked' : '' }}>
+                                        <span class="option-label">
+                                            <i class="fas fa-save"></i>
+                                            پیش‌نویس
+                                        </span>
+                                    </label>
+                                    <label class="option-item">
+                                        <input type="radio" name="status" value="published"
+                                            {{ old('status') == 'published' ? 'checked' : '' }}>
+                                        <span class="option-label">
+                                            <i class="fas fa-paper-plane"></i>
+                                            منتشر شده
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- تاریخ انتشار -->
+                        <div class="form-field">
+                            <label class="field-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                زمان انتشار (اختیاری)
+                            </label>
+                            <input type="datetime-local" name="published_at" class="form-input" id="publishedAt"
+                                value="{{ old('published_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
+                        </div>
+
+                        <!-- پنل کناری -->
+                        <div class="sidebar-panel">
+                            <div class="panel-header">
+                                <i class="fas fa-chart-line panel-icon"></i>
+                                <h4 class="panel-title">آمار مقاله</h4>
+                            </div>
+                            <div class="panel-content">
+                                <p><i class="fas fa-eye"></i> پیش‌بینی بازدید: <span id="viewEstimate">0</span></p>
+                                <p><i class="fas fa-clock"></i> زمان خوانش: <span id="readTime">0</span> دقیقه</p>
+                                <p><i class="fas fa-file-word"></i> تعداد کلمات: <span id="wordCount">0</span></p>
+                                <p><i class="fas fa-images"></i> تعداد تصاویر: <span id="imageCount">0</span></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label>آدرس مقاله (Slug) *</label>
-                    <input type="text" name="slug" value="{{ old('slug', 'test-article') }}"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
+                <!-- دکمه‌های فرم -->
+                <div class="form-actions">
+                    <div class="form-stats">
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalChars">0</div>
+                            <div class="stat-label">کاراکتر</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalWords">0</div>
+                            <div class="stat-label">کلمه</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value" id="totalImages">0</div>
+                            <div class="stat-label">تصویر</div>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-outline" id="prevSectionBtn">
+                            <i class="fas fa-arrow-right"></i> بخش قبلی
+                        </button>
+                        <button type="button" class="btn btn-outline" id="nextSectionBtn">
+                            بخش بعدی <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button type="submit" name="action" value="draft" class="btn btn-outline" id="saveDraftBtn">
+                            <i class="fas fa-save"></i> ذخیره پیش‌نویس
+                        </button>
+                        <button type="submit" name="action" value="publish" class="btn btn-primary" id="publishBtn">
+                            <i class="fas fa-paper-plane"></i> انتشار مقاله
+                        </button>
+                    </div>
                 </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label>محتوا *</label>
-                    <textarea name="content" rows="6" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
-                        required>
-                        {{ old('content', '<p>این یک مقاله تست است.</p>') }}
-                    </textarea>
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label>دسته‌بندی *</label>
-                    <select name="category_id"
-                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;" required>
-                        <option value="">انتخاب کنید</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-
-                <div style="margin-bottom: 15px;">
-                    <label>وضعیت</label><br>
-                    <input type="radio" name="status" value="draft" checked> پیش‌نویس
-                    <input type="radio" name="status" value="published" style="margin-right: 15px;"> منتشر شده
-                </div>
-
-                <input type="hidden" name="excerpt" value="چکیده مقاله تست">
-
-                <button type="submit"
-                    style="padding: 12px 30px; background: #4361ee; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-paper-plane"></i> ارسال مقاله
-                </button>
             </form>
         </div>
 
-        <!-- فرم اصلی (موقتاً غیرفعال) -->
-        <div style="display: none;">
-            <div class="post-form-card">
-                <!-- ... کد فرم اصلی شما ... -->
-            </div>
+        <!-- لودینگ -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="spinner"></div>
+            <div class="loading-text">در حال پردازش...</div>
         </div>
     </div>
 @endsection
 
 @section('scripts')
-    <script>
-        $(document).ready(function() {
-            console.log('صفحه ایجاد مقاله لود شد');
+    <!-- کتابخانه‌ها -->
+    {{-- <script src="{{ asset('js/jquery.min.js') }}"></script> --}}
+    {{-- <script src="{{ asset('js/select2.min.js') }}"></script> --}}
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
 
-            // Select2 برای برچسب‌ها
-            $('#tags').select2({
+    <script>
+        // Initialize when document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Current section tracker
+            let currentSection = 1;
+            const totalSections = 3;
+
+            // DOM Elements
+            const titleInput = document.getElementById('titleInput');
+            const slugInput = document.getElementById('slugInput');
+            const categorySelect = document.getElementById('categorySelect');
+            const excerptInput = document.getElementById('excerptInput');
+            const featuredImageInput = document.getElementById('featuredImage');
+            const previewContainer = document.getElementById('previewContainer');
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadButton = document.getElementById('uploadButton');
+            const removeImageBtn = document.getElementById('removeImageBtn');
+            const uploadArea = document.getElementById('uploadArea');
+            const generateSlugBtn = document.getElementById('generateSlugBtn');
+            const prevSectionBtn = document.getElementById('prevSectionBtn');
+            const nextSectionBtn = document.getElementById('nextSectionBtn');
+            const saveDraftBtn = document.getElementById('saveDraftBtn');
+            const publishBtn = document.getElementById('publishBtn');
+            const postForm = document.getElementById('postForm');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const progressFill = document.getElementById('progressFill');
+
+            // Character counters
+            const titleCounter = document.getElementById('titleCounter');
+            const excerptCounter = document.getElementById('excerptCounter');
+            const contentCounter = document.getElementById('contentCounter');
+
+            // Stats elements
+            const totalCharsEl = document.getElementById('totalChars');
+            const totalWordsEl = document.getElementById('totalWords');
+            const totalImagesEl = document.getElementById('totalImages');
+            const wordCountEl = document.getElementById('wordCount');
+            const viewEstimateEl = document.getElementById('viewEstimate');
+            const readTimeEl = document.getElementById('readTime');
+            const imageCountEl = document.getElementById('imageCount');
+
+            // ==================== INITIALIZATIONS ====================
+
+            // Initialize Select2 for tags
+            $('#tagsSelect').select2({
                 tags: true,
                 tokenSeparators: [','],
-                placeholder: 'برچسب‌ها را انتخاب یا وارد کنید...',
+                placeholder: 'برچسب‌ها را وارد کنید...',
                 language: 'fa',
-                dir: 'rtl'
+                dir: 'rtl',
+                width: '100%',
+                createTag: function(params) {
+                    const term = params.term.trim();
+                    if (term === '') return null;
+                    return {
+                        id: term,
+                        text: term,
+                        newTag: true
+                    };
+                }
             });
 
-            // اعتبارسنجی ساده
-            $('#simpleForm').on('submit', function(e) {
-                console.log('فرم در حال ارسال...');
-                return true;
+            // Initialize Quill Editor
+            const quill = new Quill('#editorWrapper', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        [{
+                            'header': [1, 2, 3, false]
+                        }],
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{
+                            'color': []
+                        }, {
+                            'background': []
+                        }],
+                        [{
+                            'list': 'ordered'
+                        }, {
+                            'list': 'bullet'
+                        }],
+                        [{
+                            'align': []
+                        }],
+                        ['link', 'image'],
+                        ['clean']
+                    ]
+                },
+                placeholder: 'محتوای مقاله خود را اینجا بنویسید...'
             });
+
+            // Set initial content if exists
+            const initialContent = document.getElementById('editorContent').value;
+            if (initialContent) {
+                quill.root.innerHTML = initialContent;
+            }
+
+            // Update hidden textarea on content change
+            quill.on('text-change', function() {
+                document.getElementById('editorContent').value = quill.root.innerHTML;
+                updateStats();
+                updateContentCounter();
+            });
+
+            // ==================== EVENT LISTENERS ====================
+
+            // Generate slug from title
+            generateSlugBtn.addEventListener('click', function() {
+                const title = titleInput.value.trim();
+                if (title) {
+                    const slug = title
+                        .replace(/[^\u0600-\u06FFa-zA-Z0-9\s-]/g, '')
+                        .replace(/\s+/g, '-')
+                        .replace(/-+/g, '-')
+                        .toLowerCase();
+                    slugInput.value = slug;
+                }
+            });
+
+            // Update character counters
+            titleInput.addEventListener('input', function() {
+                const length = this.value.length;
+                titleCounter.textContent = `${length}/60`;
+                titleCounter.style.color = length > 60 ? '#f72585' : '#28a745';
+            });
+
+            excerptInput.addEventListener('input', function() {
+                const length = this.value.length;
+                excerptCounter.textContent = `${length}/200`;
+                excerptCounter.style.color = length > 200 ? '#f72585' : '#28a745';
+            });
+
+            // Image upload handling
+            uploadButton.addEventListener('click', function() {
+                featuredImageInput.click();
+            });
+
+            featuredImageInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    handleImageUpload(e.target.files[0]);
+                }
+            });
+
+            // Drag and drop for image upload
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function() {
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                if (e.dataTransfer.files.length) {
+                    handleImageUpload(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Remove image
+            removeImageBtn.addEventListener('click', function() {
+                featuredImageInput.value = '';
+                previewContainer.style.display = 'none';
+                uploadArea.style.display = 'block';
+                updateStats();
+            });
+
+            // Section navigation
+            nextSectionBtn.addEventListener('click', function() {
+                if (validateCurrentSection()) {
+                    navigateToSection(currentSection + 1);
+                }
+            });
+
+            prevSectionBtn.addEventListener('click', function() {
+                navigateToSection(currentSection - 1);
+            });
+
+            // Form submission
+            postForm.addEventListener('submit', function(e) {
+                // Validate all sections before submission
+                if (!validateAllSections()) {
+                    e.preventDefault();
+                    showError('لطفا تمام فیلدهای ضروری را پر کنید');
+                    return;
+                }
+
+                // Ensure content is copied to hidden textarea
+                document.getElementById('editorContent').value = quill.root.innerHTML;
+
+                // Show loading
+                loadingOverlay.style.display = 'flex';
+            });
+
+            // ==================== FUNCTIONS ====================
+
+            // Handle image upload
+            function handleImageUpload(file) {
+                if (!file.type.match('image.*')) {
+                    showError('لطفا فقط فایل تصویری انتخاب کنید');
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) { // 5MB
+                    showError('حجم فایل باید کمتر از ۵ مگابایت باشد');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    previewContainer.style.display = 'block';
+                    uploadArea.style.display = 'none';
+                    updateStats();
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Navigate between sections
+            function navigateToSection(sectionNumber) {
+                if (sectionNumber < 1 || sectionNumber > totalSections) return;
+
+                // Hide current section
+                document.querySelector(`#section${currentSection}`).classList.remove('active-section');
+
+                // Show new section
+                document.querySelector(`#section${sectionNumber}`).classList.add('active-section');
+
+                // Update progress
+                currentSection = sectionNumber;
+                progressFill.style.width = `${(sectionNumber / totalSections) * 100}%`;
+
+                // Update progress steps
+                document.querySelectorAll('.progress-step').forEach((step, index) => {
+                    if (index + 1 <= sectionNumber) {
+                        step.classList.add('active');
+                    } else {
+                        step.classList.remove('active');
+                    }
+                });
+
+                // Update navigation buttons
+                prevSectionBtn.style.display = sectionNumber === 1 ? 'none' : 'flex';
+                nextSectionBtn.style.display = sectionNumber === totalSections ? 'none' : 'flex';
+
+                // Scroll to top of section
+                document.querySelector(`#section${sectionNumber}`).scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+
+            // Validate current section
+            function validateCurrentSection() {
+                switch (currentSection) {
+                    case 1:
+                        if (!titleInput.value.trim()) {
+                            showError('عنوان مقاله الزامی است');
+                            titleInput.focus();
+                            return false;
+                        }
+                        if (!slugInput.value.trim()) {
+                            showError('آدرس مقاله الزامی است');
+                            slugInput.focus();
+                            return false;
+                        }
+                        if (!categorySelect.value) {
+                            showError('لطفا دسته‌بندی را انتخاب کنید');
+                            categorySelect.focus();
+                            return false;
+                        }
+                        if (!excerptInput.value.trim()) {
+                            showError('چکیده مقاله الزامی است');
+                            excerptInput.focus();
+                            return false;
+                        }
+                        return true;
+
+                    case 2:
+                        const content = quill.getText().trim();
+                        if (content.length < 100) {
+                            showError('محتوای مقاله باید حداقل ۱۰۰ کاراکتر داشته باشد');
+                            return false;
+                        }
+                        return true;
+
+                    default:
+                        return true;
+                }
+            }
+
+            // Validate all sections
+            function validateAllSections() {
+                // Validate section 1
+                if (!titleInput.value.trim() ||
+                    !slugInput.value.trim() ||
+                    !categorySelect.value ||
+                    !excerptInput.value.trim()) {
+                    navigateToSection(1);
+                    return false;
+                }
+
+                // Validate section 2
+                const content = quill.getText().trim();
+                if (content.length < 100) {
+                    navigateToSection(2);
+                    return false;
+                }
+
+                return true;
+            }
+
+            // Update content counter
+            function updateContentCounter() {
+                const text = quill.getText();
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                const chars = text.length;
+
+                contentCounter.textContent = `${chars} کاراکتر، ${words.length} کلمه`;
+            }
+
+            // Update all stats
+            function updateStats() {
+                const content = quill.getText();
+                const htmlContent = quill.root.innerHTML;
+
+                // Count words and characters
+                const words = content.trim().split(/\s+/).filter(word => word.length > 0);
+                const chars = content.length;
+
+                // Count images
+                const editorImages = (htmlContent.match(/<img/g) || []).length;
+                const featuredImage = previewContainer.style.display === 'block' ? 1 : 0;
+                const totalImages = editorImages + featuredImage;
+
+                // Calculate reading time (200 words per minute)
+                const readTime = Math.ceil(words.length / 200);
+
+                // Estimate views based on content length and images
+                const viewEstimate = Math.ceil(words.length * 0.5 + totalImages * 10);
+
+                // Update elements
+                totalCharsEl.textContent = chars;
+                totalWordsEl.textContent = words.length;
+                totalImagesEl.textContent = totalImages;
+                wordCountEl.textContent = words.length;
+                readTimeEl.textContent = readTime;
+                imageCountEl.textContent = totalImages;
+                viewEstimateEl.textContent = viewEstimate;
+            }
+
+            // Show error message
+            function showError(message) {
+                // Remove existing alerts
+                const existingAlert = document.querySelector('.alert-danger');
+                if (existingAlert) existingAlert.remove();
+
+                // Create new alert
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.innerHTML = `
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>${message}</div>
+                `;
+
+                // Add to page
+                const container = document.querySelector('.post-create-container');
+                container.insertBefore(alertDiv, container.firstChild);
+
+                // Remove after 5 seconds
+                setTimeout(() => {
+                    alertDiv.style.animation = 'slideOut 0.4s ease';
+                    setTimeout(() => alertDiv.remove(), 400);
+                }, 5000);
+
+                // Scroll to top
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+
+            // Initialize
+            function init() {
+                // Update counters with initial values
+                titleInput.dispatchEvent(new Event('input'));
+                excerptInput.dispatchEvent(new Event('input'));
+                updateStats();
+                updateContentCounter();
+
+                // Set initial button states
+                prevSectionBtn.style.display = 'none';
+                nextSectionBtn.style.display = 'flex';
+
+                // Show first section
+                navigateToSection(1);
+            }
+
+            // Start everything
+            init();
         });
     </script>
 @endsection

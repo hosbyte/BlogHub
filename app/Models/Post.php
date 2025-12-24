@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 // use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Post extends Model
@@ -17,6 +18,7 @@ class Post extends Model
         'title',        // عنوان مقاله
         'slug',         // نامک برای URL
         'content',      // محتوای مقاله
+        'featured_image',// ذخیره عکس
         'excerpt',      // خلاصه مقاله
         'thumbnail_id', // آیدی تصویر شاخص
         'status',       // وضعیت (پیش‌نویس، منتشر شده، آرشیو)
@@ -177,14 +179,30 @@ class Post extends Model
      * دریافت آدرس کامل تصویر شاخص
      * @return string
      */
-    public function getThumbnailUrlAttribute()
-    {
-        if ($this->thumbnail) {
-            return asset('storage/' . $this->thumbnail->path);
-        }
+    // public function getThumbnailUrlAttribute()
+    // {
+    //     if ($this->thumbnail) {
+    //         return asset('storage/' . $this->thumbnail->path);
+    //     }
 
+    //     // تصویر پیش‌فرض
+    //     return asset('images/default-thumbnail.jpg');
+    // }
+    // Getter برای featured_image
+    public function getFeaturedImageUrlAttribute()
+    {
+        if ($this->featured_image) {
+            // اگر مسیر کامل است (شامل http)
+            if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
+                return $this->featured_image;
+            }
+            
+            // اگر مسیر نسبی است
+            return asset('storage/' . $this->featured_image);
+        }
+        
         // تصویر پیش‌فرض
-        return asset('images/default-thumbnail.jpg');
+        return asset('images/default-post.jpg');
     }
 
     /**

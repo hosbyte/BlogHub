@@ -10,6 +10,8 @@ use App\Models\Post;
 use App\Models\Category;
 use App\Models\Tag;
 use App\Models\Media;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class PostController extends Controller
 {
@@ -83,10 +85,16 @@ class PostController extends Controller
      */
     public function create()
     {
-        $categories = Category::all();
-        $tags = Tag::all();
-
-        return view('user.posts.create' , compact('categories' , 'tags'));
+        // دریافت دسته‌بندی‌ها
+        $categories = Category::with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
+        
+        // دریافت برچسب‌های موجود
+        $existingTags = Tag::orderBy('name')->get();
+        
+        return view('user.posts.create', compact('categories', 'existingTags'));
     }
 
     /**
@@ -102,6 +110,7 @@ class PostController extends Controller
             'title' => 'required|string|max:200',
             'slug' => 'required|string|max:200|unique:posts,slug',
             'content' => 'required|string|min:10',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', 
             'excerpt' => 'nullable|string|max:300',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'nullable|array',
@@ -118,20 +127,16 @@ class PostController extends Controller
         ]);
 
         // آپلود تصویر شاخص
-        if($request->hasFile('thumbnail'))
-        {
-            $path = $request->file('thumbnail')->store('thumbnails' , 'public');
-
-            // ایجاد رکورد media
-            $media = Media::create([
-                'name' => $request->file('thumbnail')->getClientOriginalName(),
-                'path' => $path,
-                'type' => 'image',
-                'size' => $request->file('thumbnail')->getSize(),
-                'user_id' => Auth::id(),
-            ]);
-
-            $validated ['thumbnail_id'] = $media->id; 
+        $featuredImagePath = null;
+        if ($request->hasFile('featured_image')) {
+            $image = $request->file('featured_image');
+            
+            // ایجاد نام یکتا برای فایل
+            $imageName = 'post_' . time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            
+            // ذخیره در storage
+            $path = $image->storeAs('posts/featured', $imageName, 'public');
+            $featuredImagePath = $path;
         }
 
         // ایجاد مقاله
@@ -139,6 +144,7 @@ class PostController extends Controller
             'title' => $validated['title'],
             'slug' => $validated['slug'],
             'content' => $validated['content'],
+            'featured_image' => $featuredImagePath,
             'excerpt' => $validated['excerpt'] ?? null,
             'user_id' => Auth::id(),
             'category_id' => $validated['category_id'],
@@ -148,15 +154,15 @@ class PostController extends Controller
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
             'meta_keywords' => $validated['meta_keywords'] ?? null,
-            'published_at' => $validated['status'] === 'published' 
-                ? ($validated['published_at'] ?? now()) 
+            'published_at' => $validated['status'] === 'published'
+                ? ($validated['published_at'] ?? now())
                 : null,
             'allow_comments' => $request->boolean('allow_comments'),
             'view_count' => 0,
         ]);
 
         // افزودن برچسب‌ها
-        if ($request->has('tags')) 
+        if ($request->has('tags'))
         {
             $post->tags()->attach($request->tags);
         }
@@ -170,13 +176,13 @@ class PostController extends Controller
 
          // ریدایرکت بر اساس action
         $action = $request->input('action', 'draft');
-        
-        if ($action === 'draft') 
+
+        if ($action === 'draft')
         {
             return redirect()->route('user.posts.index')
                 ->with('success', 'مقاله با موفقیت به عنوان پیش‌نویس ذخیره شد.');
-        } 
-        else 
+        }
+        else
         {
             return redirect()->route('posts.show', $post->slug)
                 ->with('success', 'مقاله با موفقیت منتشر شد.');
@@ -220,8 +226,73 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        $post = Post::where('user_id', Auth::id())->findOrFail($id);
+        // اعتبارسنجی
+        $validated = $request->validate([
+            'title' => 'required|string|max:200',
+            'slug' => 'required|string|max:200|unique:posts,slug',
+            'content' => 'required|string|min:10',
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'excerpt' => 'nullable|string|max:300',
+            'category_id' => 'required|exists:categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
+            'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
+            'status' => 'required|in:draft,published',
+            'is_featured' => 'boolean',
+            'meta_title' => 'nullable|string|max:60',
+            'meta_description' => 'nullable|string|max:160',
+            'meta_keywords' => 'nullable|string|max:255',
+            'published_at' => 'nullable|date',
+            'allow_comments' => 'boolean',
+            'include_in_rss' => 'boolean',
+        ]);
+
+        // آپلود تصویر جدید (اگر ارسال شده)
+        if ($request->hasFile('featured_image')) 
+        {
+            // حذف تصویر قبلی اگر وجود دارد
+            if ($post->featured_image) {
+                Storage::disk('public')->delete($post->featured_image);
+            }
+            
+            $image = $request->file('featured_image');
+            $imageName = 'post_' . time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('posts/featured', $imageName, 'public');
+            $validated['featured_image'] = $path;
+        } 
+        else 
+        {
+            // اگر تصویر جدیدی ارسال نشده، تصویر قبلی را حفظ کن
+            unset($validated['featured_image']);
+        }
+
+        // آپدیت مقاله
+        $post->update($validated);
+
+        // آپدیت برچسب‌ها
+        if (isset($validated['tags'])) 
+        {
+            $tagIds = [];
+            foreach ($validated['tags'] as $tagName) {
+                $tag = Tag::firstOrCreate(
+                    ['name' => trim($tagName)],
+                    ['slug' => Str::slug(trim($tagName))]
+                );
+                $tagIds[] = $tag->id;
+            }
+            $post->tags()->sync($tagIds);
+        } 
+        else 
+        {
+            $post->tags()->detach();
+        }
+
+        return redirect()->route('user.posts.index')
+            ->with('success', 'مقاله با موفقیت ویرایش شد.');
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -229,13 +300,19 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post)
+    public function destroy(Post $post , $id)
     {
-        $this->authorize('delete' , $post);
-
+        $post = Post::where('user_id', Auth::id())->findOrFail($id);
+        
+        // حذف تصویر شاخص
+        if ($post->featured_image) {
+            Storage::disk('public')->delete($post->featured_image);
+        }
+        
         $post->delete();
-
-        return redirect()->route('user.posts.index')->with('success', 'مقاله با موفقیت حذف شد.');
+        
+        return redirect()->route('user.posts.index')
+            ->with('success', 'مقاله با موفقیت حذف شد.');
     }
 
     /**
@@ -267,7 +344,7 @@ class PostController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         // فقط مقالات متعلق به کاربر
         Post::where('user_id', $user->id)
             ->whereIn('id', $request->posts)
@@ -290,7 +367,7 @@ class PostController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         // فقط مقالات متعلق به کاربر
         Post::where('user_id', $user->id)
             ->whereIn('id', $request->posts)

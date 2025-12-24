@@ -7,18 +7,21 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>@yield('title', 'BlogHub') | سیستم مدیریت وبلاگ چندکاربره</title>
 
-    <!-- Select2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
+   <!-- فونت Vazirmatn برای فارسی -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@vazirmatn/matn@1.0.0-beta.3/dist/font-face.css">
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Quill Editor CSS -->
+    <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
+    
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700&family=Samim&display=swap"
-        rel="stylesheet">
-
-    <!-- Styles -->
+    <!-- استایل اصلی پروژه -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/post-form.css') }}">
 
     @yield('styles')
 </head>
@@ -244,16 +247,16 @@
     </footer>
 
     <!-- ========== JavaScript Libraries ========== -->
-    <!-- jQuery 3.6.0 (اولین کتابخانه) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Select2 JS -->
+    <!-- ابتدا jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- سپس Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
-    <!-- فایل اصلی JS (اگر وجود دارد) -->
-    @if (file_exists(public_path('js/main.js')))
-        <script src="{{ asset('js/main.js') }}"></script>
-    @endif
+    
+    <!-- و بعد Quill -->
+    <script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+    
+    <!-- اسکریپت‌های سفارشی صفحه -->
 
     <!-- Scripts داخلی -->
     <script>
@@ -346,6 +349,8 @@
             }
         }
     </script>
+    <!-- اسکریپت‌های کلی پروژه -->
+    <script src="{{ asset('js/app.js') }}"></script>
 
     @yield('scripts')
 </body>
