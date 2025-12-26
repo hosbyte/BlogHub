@@ -3,7 +3,7 @@
 @section('title', 'مقالات من - BlogHub')
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/user-posts.css') }}">
+    {{-- <link rel="stylesheet" href="{{ asset('css/user-posts.css') }}"> --}}
     <style>
         /* استایل‌های اضافی برای select2 (اگر استفاده می‌کنید) */
         .select2-container--default .select2-selection--single {
@@ -223,7 +223,7 @@
                                             <i class="fas fa-external-link-alt"></i>
                                         </a>
 
-                                        <a href="{{ route('user.posts.edit', $post) }}" class="action-btn edit"
+                                        <a href="{{ route('user.posts.edit', $post->id) }}" class="action-btn edit"
                                             title="ویرایش">
                                             <i class="fas fa-edit"></i>
                                         </a>
@@ -269,7 +269,7 @@
             @endif
         </div>
 
-        <!-- پagination -->
+        <!-- agination -->
         @if ($posts->count() > 0)
             <div class="pagination-container">
                 <div class="pagination-info">

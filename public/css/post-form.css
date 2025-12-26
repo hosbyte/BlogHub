@@ -593,12 +593,12 @@
         flex-direction: column;
         text-align: center;
     }
-    
+
     .progress-steps {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .form-grid {
         grid-template-columns: 1fr;
     }
@@ -608,33 +608,33 @@
     .post-create-container {
         padding: 20px 15px;
     }
-    
+
     .form-content-wrapper {
         padding: 20px;
     }
-    
+
     .post-create-title {
         font-size: 1.6rem;
     }
-    
+
     .action-buttons {
         flex-direction: column;
     }
-    
+
     .btn {
         width: 100%;
         justify-content: center;
     }
-    
+
     .form-stats {
         justify-content: center;
     }
-    
+
     .stat-box {
         min-width: 80px;
         padding: 12px;
     }
-    
+
     .stat-value {
         font-size: 1.5rem;
     }
@@ -644,22 +644,70 @@
     .post-create-title {
         font-size: 1.4rem;
     }
-    
+
     .section-header {
         flex-direction: column;
         text-align: center;
         gap: 10px;
     }
-    
+
     .section-icon {
         width: 40px;
         height: 40px;
         font-size: 1rem;
     }
-    
+
     .form-input,
     .slug-prefix,
     .slug-input {
         padding: 12px;
+    }
+}
+
+/* استایل‌های مخصوص ویرایش */
+.header-actions {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.current-image-container {
+    margin-bottom: 20px;
+}
+
+.image-info {
+    text-align: center;
+    color: #6c757d;
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+/* استایل‌های ریسپانسیو */
+@media (max-width: 768px) {
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-danger {
+        width: 100%;
+        justify-content: center;
     }
 }

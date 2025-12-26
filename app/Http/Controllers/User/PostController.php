@@ -90,10 +90,10 @@ class PostController extends Controller
             ->whereNull('parent_id')
             ->orderBy('name')
             ->get();
-        
+
         // دریافت برچسب‌های موجود
         $existingTags = Tag::orderBy('name')->get();
-        
+
         return view('user.posts.create', compact('categories', 'existingTags'));
     }
 
@@ -110,7 +110,7 @@ class PostController extends Controller
             'title' => 'required|string|max:200',
             'slug' => 'required|string|max:200|unique:posts,slug',
             'content' => 'required|string|min:10',
-            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120', 
+            'featured_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
             'excerpt' => 'nullable|string|max:300',
             'category_id' => 'required|exists:categories,id',
             'tags' => 'nullable|array',
@@ -130,10 +130,10 @@ class PostController extends Controller
         $featuredImagePath = null;
         if ($request->hasFile('featured_image')) {
             $image = $request->file('featured_image');
-            
+
             // ایجاد نام یکتا برای فایل
             $imageName = 'post_' . time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-            
+
             // ذخیره در storage
             $path = $image->storeAs('posts/featured', $imageName, 'public');
             $featuredImagePath = $path;
@@ -206,15 +206,19 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Post $post)
+    public function edit($id)
     {
-        // اطمینان از اینکه کاربر صاحب مقاله است
-        $this->authorize('update' , $post);
+        // فقط مقالات کاربر جاری
+        $post = Post::where('user_id', Auth::id())->findOrFail($id);
 
-        $categories = Category::all();
-        $tags = Tag::all();
+        $categories = Category::with('children')
+            ->whereNull('parent_id')
+            ->orderBy('name')
+            ->get();
 
-        return view('user.posts.edit' , compact('post' , 'categories' , 'tags'));
+        $existingTags = Tag::orderBy('name')->get();
+
+        return view('user.posts.edit', compact('post', 'categories', 'existingTags'));
     }
 
     /**
@@ -250,19 +254,19 @@ class PostController extends Controller
         ]);
 
         // آپلود تصویر جدید (اگر ارسال شده)
-        if ($request->hasFile('featured_image')) 
+        if ($request->hasFile('featured_image'))
         {
             // حذف تصویر قبلی اگر وجود دارد
             if ($post->featured_image) {
                 Storage::disk('public')->delete($post->featured_image);
             }
-            
+
             $image = $request->file('featured_image');
             $imageName = 'post_' . time() . '_' . Str::random(10) . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('posts/featured', $imageName, 'public');
             $validated['featured_image'] = $path;
-        } 
-        else 
+        }
+        else
         {
             // اگر تصویر جدیدی ارسال نشده، تصویر قبلی را حفظ کن
             unset($validated['featured_image']);
@@ -272,7 +276,7 @@ class PostController extends Controller
         $post->update($validated);
 
         // آپدیت برچسب‌ها
-        if (isset($validated['tags'])) 
+        if (isset($validated['tags']))
         {
             $tagIds = [];
             foreach ($validated['tags'] as $tagName) {
@@ -283,8 +287,8 @@ class PostController extends Controller
                 $tagIds[] = $tag->id;
             }
             $post->tags()->sync($tagIds);
-        } 
-        else 
+        }
+        else
         {
             $post->tags()->detach();
         }
@@ -303,14 +307,14 @@ class PostController extends Controller
     public function destroy(Post $post , $id)
     {
         $post = Post::where('user_id', Auth::id())->findOrFail($id);
-        
+
         // حذف تصویر شاخص
         if ($post->featured_image) {
             Storage::disk('public')->delete($post->featured_image);
         }
-        
+
         $post->delete();
-        
+
         return redirect()->route('user.posts.index')
             ->with('success', 'مقاله با موفقیت حذف شد.');
     }

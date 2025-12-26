@@ -50,6 +50,7 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
     Route::get('/posts/create' , [UserPostController::class , 'create'])->name('posts.create');
     Route::post('/posts', [UserPostController::class, 'store'])->name('posts.store');
     Route::get('/posts/{post}/edit' , [UserPostController::class , 'edit'])->name('posts.edit');
+    Route::put('/posts/{post}' , [UserPostController::class , 'update'])->name('posts.update');
     Route::delete('/posts/{post}' , [UserPostController::class , 'destroy'])->name('posts.destroy');
     Route::post('/posts/{post}/status' , [UserPostController::class , 'changeStatus'])->name('posts.change-status');
 
