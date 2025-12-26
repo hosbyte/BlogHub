@@ -2,9 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PostController as FrontPostController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Front\PostController as FrontPostController;
+use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Front\TagController;
 use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\ProfileController;
 use App\Http\Controllers\User\PostController as UserPostController;
@@ -35,6 +36,9 @@ Route::middleware('auth')->group(function () {
 
 // دسته بندی
 Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
+
+// برچسب ها
+Route::get('/tag/{slug}' , [TagController::class , 'show'])->name('tag.show');
 
 // پنل کاربری
 Route::middleware('auth')->prefix('user')->name('user.')->group(function() {

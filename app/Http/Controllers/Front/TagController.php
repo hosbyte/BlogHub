@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Front;
 
-use App\Models\Category;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller
+class TagController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -44,29 +44,9 @@ class CategoryController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($slug)
+    public function show($id)
     {
-        $category = Category::where('slug' , $slug)->firstOrFail();
-        $posts = $category->posts()
-            ->published()
-            ->latest()
-            ->paginate(10);
-
-        // زیردسته‌ها
-        $subcategories = $category->children()->hasPosts()->get();
-
-        // دسته‌بندی‌های هم‌سطح
-        $siblingCategories = Category::where('parent_id' , $category->parent_id)
-            ->where('id' , '!=' , $category->id)
-            ->hasPosts()
-            ->get();
-
-        return view('front.categories.show' , compact(
-            'category' ,
-            'posts',
-            'subcategories',
-            'siblingCategories',
-        ));
+        //
     }
 
     /**
