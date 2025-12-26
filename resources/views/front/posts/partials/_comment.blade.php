@@ -1,32 +1,43 @@
-<div class="comment mb-6 p-4 border rounded-lg" data-comment-id="{{ $comment->id }}">
-    {{-- هدر نظر --}}
-    <div class="comment-header flex items-center justify-between mb-2">
-        <div class="flex items-center space-x-2">
-            <img src="{{ $comment->user->avatar ?? asset('images/default-avatar.png') }}" alt="{{ $comment->user->name }}"
-                class="w-8 h-8 rounded-full">
-            <div>
-                <strong class="text-gray-800">{{ $comment->user->name }}</strong>
-                <span class="text-xs text-gray-500 ml-2">
-                    {{ $comment->created_at->diffForHumans() }}
-                </span>
+<div class="comment-item" data-comment-id="{{ $comment->id }}">
+    <div class="comment-header">
+        <div class="comment-user">
+            @if ($comment->user->avatar)
+                <img src="{{ asset('storage/' . $comment->user->avatar) }}" alt="{{ $comment->user->name }}"
+                    class="comment-avatar">
+            @else
+                <div class="comment-avatar"
+                    style="background: #4361ee; color: white; display: flex; align-items: center; justify-content: center; font-size: 1rem;">
+                    {{ substr($comment->user->name, 0, 1) }}
+                </div>
+            @endif
+            <div class="comment-meta">
+                <span class="comment-author">{{ $comment->user->name }}</span>
+                <span class="comment-date">{{ $comment->created_at->diffForHumans() }}</span>
             </div>
         </div>
+        @if ($comment->status === 'pending')
+            <span class="comment-status status-pending">در انتظار تایید</span>
+        @elseif($comment->status === 'approved')
+            <span class="comment-status status-approved">تایید شده</span>
+        @endif
+    </div>
+
+    <div class="comment-content">
+        {{ $comment->content }}
+    </div>
+
+    <div class="comment-actions">
         @auth
-            <button class="reply-btn text-xs text-blue-600 hover:text-blue-800" data-comment-id="{{ $comment->id }}">
-                ↪ پاسخ
+            <button type="button" class="reply-btn" data-comment-id="{{ $comment->id }}">
+                <i class="fas fa-reply"></i> پاسخ
             </button>
         @endauth
     </div>
 
-    {{-- متن نظر --}}
-    <div class="comment-body mb-3">
-        <p class="text-gray-700">{{ $comment->content }}</p>
-    </div>
-
-    {{-- پاسخ‌ها (نمایش بازگشتی) --}}
-    @if ($comment->replies && $comment->replies->count() > 0)
-        <div class="comment-replies ml-8 pl-4 border-l-2 border-gray-200">
-            @foreach ($comment->replies as $reply)
+    <!-- پاسخ‌ها -->
+    @if ($comment->replies->where('status', 'approved')->count() > 0)
+        <div class="comment-replies">
+            @foreach ($comment->replies->where('status', 'approved') as $reply)
                 @include('front.posts.partials._comment', ['comment' => $reply])
             @endforeach
         </div>

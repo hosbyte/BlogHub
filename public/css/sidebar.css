@@ -1,0 +1,202 @@
+/* ============================================
+   استایل سایدبار
+============================================ */
+
+.sidebar {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+.widget {
+    margin-bottom: 35px;
+}
+
+.widget:last-child {
+    margin-bottom: 0;
+}
+
+.widget-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border);
+    color: var(--dark);
+    position: relative;
+}
+
+.widget-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: 0;
+    width: 60px;
+    height: 2px;
+    background: var(--primary);
+}
+
+/* جستجو */
+.search-form {
+    position: relative;
+}
+
+.search-input {
+    width: 100%;
+    padding: 14px 50px 14px 20px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Vazirmatn', sans-serif;
+    font-size: 1rem;
+}
+
+.search-button {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--primary);
+    cursor: pointer;
+    font-size: 1.2rem;
+}
+
+/* دسته‌بندی‌ها */
+.category-list, .tag-list {
+    list-style: none;
+}
+
+.category-list li, .tag-list li {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.category-list li:last-child, .tag-list li:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.category-list a, .tag-list a {
+    color: var(--gray);
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: color 0.3s;
+}
+
+.category-list a:hover, .tag-list a:hover {
+    color: var(--primary);
+}
+
+.category-count, .tag-count {
+    background: var(--light);
+    color: var(--dark);
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* مقالات اخیر */
+.recent-posts {
+    list-style: none;
+}
+
+.recent-post {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.recent-post:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.recent-post-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.recent-post-content {
+    flex: 1;
+}
+
+.recent-post-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.recent-post-title a {
+    color: var(--dark);
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.recent-post-title a:hover {
+    color: var(--primary);
+}
+
+.recent-post-date {
+    font-size: 0.85rem;
+    color: var(--gray);
+}
+
+/* تبلیغات */
+.advertisement {
+    text-align: center;
+    padding: 30px 20px;
+    background: linear-gradient(135deg, #f8f9ff, #eef0ff);
+    border-radius: 10px;
+    border: 2px dashed var(--border);
+}
+
+.ad-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--dark);
+}
+
+.ad-description {
+    color: var(--gray);
+    margin-bottom: 20px;
+}
+
+/* خبرنامه */
+.newsletter-form {
+    margin-top: 20px;
+}
+
+.newsletter-input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-family: 'Vazirmatn', sans-serif;
+}
+
+.newsletter-button {
+    width: 100%;
+}
+
+/* ریسپانسیو */
+@media (max-width: 992px) {
+    .sidebar {
+        margin-top: 40px;
+    }
+}
