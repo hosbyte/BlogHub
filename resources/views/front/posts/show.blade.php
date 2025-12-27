@@ -5,7 +5,7 @@
 
 @section('styles')
     <link rel="stylesheet" href="{{ asset('css/post.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/comments.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/comment.css') }}">
     <link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
     <style>
         /* استایل‌های اضافی */
@@ -337,7 +337,7 @@
     </header>
 
     <div class="article-main">
-        <!-- //TODO: محتوای اصلی -->
+        <!-- محتوای اصلی -->
         <main class="article-content-wrapper">
             <!-- تصویر شاخص -->
             @if ($post->featured_image)

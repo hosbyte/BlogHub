@@ -1,7 +1,11 @@
+<link rel="stylesheet" href="{{ asset('css/post.css') }}">
+<link rel="stylesheet" href="{{ asset('css/post-form.css') }}">
+<link rel="stylesheet" href="{{ asset('css/sidebar.css') }}">
+<link rel="stylesheet" href="{{ asset('css/style.css') }}">
 <article class="post-card">
     @if ($post->featured_image)
         <div class="post-image">
-            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}">
+            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}" class="featured-image">
             @if ($post->category)
                 <a href="{{ route('categories.show', $post->category->slug) }}" class="post-category">
                     {{ $post->category->name }}
