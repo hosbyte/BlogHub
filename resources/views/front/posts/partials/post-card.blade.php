@@ -1,72 +1,42 @@
 <article class="post-card">
-    <a href="{{ route('posts.show', $post->slug) }}" class="post-card-link">
-
-        {{-- تصویر شاخص --}}
-        <div class="post-thumbnail">
-            <img src="{{ $post->thumbnail_url }}"
-                 alt="{{ $post->title }}"
-                 class="post-image"
-                 onerror="this.src='{{ asset('images/default-thumbnail.jpg') }}'">
-
-            {{-- نشان ویژه --}}
-            @if($post->is_featured)
-                <span class="featured-badge">
-                    <i class="fas fa-star"></i> ویژه
-                </span>
+    @if ($post->featured_image)
+        <div class="post-image">
+            <img src="{{ $post->featured_image_url }}" alt="{{ $post->title }}">
+            @if ($post->category)
+                <a href="{{ route('categories.show', $post->category->slug) }}" class="post-category">
+                    {{ $post->category->name }}
+                </a>
             @endif
         </div>
+    @endif
 
-        {{-- محتوا --}}
-        <div class="post-card-content">
-
-            {{-- عنوان --}}
-            <h3 class="post-title">
+    <div class="post-content">
+        <h3 class="post-title">
+            <a href="{{ route('posts.show', $post->slug) }}">
                 {{ $post->title }}
-            </h3>
+            </a>
+        </h3>
 
-            {{-- خلاصه --}}
-            @if($post->excerpt)
-                <p class="post-excerpt">
-                    {{ Str::limit($post->excerpt, 120) }}
-                </p>
-            @endif
+        <p class="post-excerpt">
+            {{ Str::limit(strip_tags($post->excerpt), 150) }}
+        </p>
 
-            {{-- اطلاعات مقاله --}}
-            <div class="post-meta">
-
-                {{-- نویسنده --}}
-                <div class="meta-item">
-                    <i class="fas fa-user"></i>
-                    <span>{{ $post->user->name }}</span>
-                </div>
-
-                {{-- تاریخ --}}
-                <div class="meta-item">
-                    <i class="far fa-calendar"></i>
-                    <span>
-                        {{ $post->published_at ? $post->published_at->format('Y/m/d') : 'بدون تاریخ' }}
-                    </span>
-                </div>
-
-                {{-- بازدید --}}
-                <div class="meta-item">
-                    <i class="far fa-eye"></i>
-                    <span>{{ number_format($post->view_count) }}</span>
-                </div>
-
-                {{-- دسته‌بندی --}}
-                @if($post->category)
-                    <div class="meta-item">
-                        <i class="fas fa-folder"></i>
-                        <a href="{{ route('categories.show', $post->category->slug) }}">
-                            {{ $post->category->name }}
-                        </a>
+        <div class="post-meta">
+            <div class="author-info">
+                @if ($post->user->avatar)
+                    <img src="{{ $post->user->avatar_url }}" alt="{{ $post->user->name }}" class="author-avatar">
+                @else
+                    <div class="author-avatar default-avatar">
+                        {{ substr($post->user->name, 0, 1) }}
                     </div>
                 @endif
-
+                <span>{{ $post->user->name }}</span>
             </div>
 
+            <div class="post-date">
+                <i class="far fa-clock"></i>
+                {{ $post->created_at->diffForHumans() }}
+            </div>
         </div>
-
-    </a>
+    </div>
 </article>

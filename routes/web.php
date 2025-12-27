@@ -5,6 +5,8 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Front\PostController as FrontPostController;
 use App\Http\Controllers\Front\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\Front\AuthorController;
+use App\Http\Controllers\Front\SearchController;
 use App\Http\Controllers\Front\TagController;
 use App\Http\Controllers\User\DashboardController;
 use App\Http\Controllers\User\ProfileController;
@@ -24,9 +26,24 @@ use App\Http\Controllers\User\PostController as UserPostController;
 // صفحه اصلی
 Route::get('/' , [HomeController::class , 'index'])->name('home');
 
-//مقالات
-Route::get('/posts' , [FrontPostController::class , 'index'])->name('posts.index');
-Route::get('/posts/{slug}' , [FrontPostController::class , 'show'])->name('posts.show');
+// مقالات عمومی
+Route::prefix('blog')->name('posts.')->group(function() {
+    Route::get('/', [FrontPostController::class, 'index'])->name('index');
+    Route::get('/{slug}', [FrontPostController::class, 'show'])->name('show');
+    Route::post('/{post}/view', [FrontPostController::class, 'incrementView'])->name('view');
+});
+
+// دسته بندی
+Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
+
+// برچسب ها
+Route::get('/tags/{slug}' , [TagController::class , 'show'])->name('tags.show');
+
+// نویسندگان
+Route::get('/authors/{username}' , [AuthorController::class , 'show'])->name('authors.show');
+
+// جستوجو
+Route::get('/search' , [SearchController::class , 'index'])->name('search');
 
 // نظرات (نیاز به auth)
 Route::middleware('auth')->group(function () {
@@ -34,11 +51,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/comments/{comment}' , [CommentController::class , 'destroy'])->name('comments.destroy');
 });
 
-// دسته بندی
-Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
-
-// برچسب ها
-Route::get('/tag/{slug}' , [TagController::class , 'show'])->name('tag.show');
+// افزایش بازدید
+// Route::get('/posts/{post}/view' , [FrontPostController::class , 'incrementView'])->name('post.view');
+Route::get('/posts/{post}/view' , [FrontPostController::class , 'incrementView'])->name('post.incrementView');
 
 // پنل کاربری
 Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
@@ -63,8 +78,4 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
     Route::post('/posts/bulk-delete', [UserPostController::class, 'bulkDelete'])->name('posts.bulk-delete');
 });
 
-// auth route
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
 require __DIR__.'/auth.php';

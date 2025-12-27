@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Front;
 
 use App\Models\Post;
 use App\Models\Category;
+use App\Models\Tag;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -16,73 +17,43 @@ class PostController extends Controller
      */
     public function index(Request $request)
     {
-        // دریافت پارامترهای جستجو و فیلتر
-        $search = $request->input('search');
-        $category = $request->input('category');
-        $author = $request->input('author');
-        $sort = $request->input('sort' , 'newest');
+        $posts = Post::with(['user', 'category', 'tags'])
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->orderBy('published_at', 'desc')
+            ->paginate(12);
 
-        // شروع query
-        $query = Post::published();
-        // $query = Post::available();
+        $categories = Category::withCount(['posts' => function($query) {
+            $query->where('status', 'published')
+                  ->where('published_at', '<=', now());
+        }])
+        ->whereHas('posts', function($query) {
+            $query->where('status', 'published')
+                  ->where('published_at', '<=', now());
+        })
+        ->orderBy('name')
+        ->get();
 
-        // اعمال جستجو
-        if($search)
-        {
-            $query->where(function ($q) use ($search) {
-                $q->where('title' , 'like' , "%{$search}%")
-                  ->orWhere('content' , 'like' , "%{$search}%")
-                  ->orWhere('excerpt' , 'like' , "%{$search}%");
-            });
-        }
+        $recentPosts = Post::with(['user', 'category'])
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->orderBy('published_at', 'desc')
+            ->limit(5)
+            ->get();
 
-        // فیلتر دسته‌بندی
-        if($category)
-        {
-            $query->whereHas('category' , function($q) use ($category) {
-                $q->where('slug' , $category);
-            });
-        }
+        $popularTags = Tag::withCount(['posts' => function($query) {
+            $query->where('status', 'published')
+                  ->where('published_at', '<=', now());
+        }])
+        ->orderBy('posts_count', 'desc')
+        ->limit(10)
+        ->get();
 
-        // فیلتر نویسنده
-        if($author)
-        {
-            $query->whereHas('user' , function ($q) use ($author) {
-                $q->where('id' , $author);
-            });
-        }
-
-        // مرتب‌سازی
-        switch ($sort)
-        {
-            case 'popular' :
-                $query->orderby('view_count' , 'desc');
-            break;
-            case 'featured':
-                $query->where('is_featured' , 'true')->orderby('published_at' , 'desc');
-            break;
-            case 'oldest':
-                $query->orderby('published_at' , 'asc');
-            break;
-            default :
-                $query->orderby('published_at' , 'desc');
-        }
-
-        // دریافت مقالات با صفحه‌بندی
-        $posts = $query->paginate(10)->withQueryString();
-
-        // داده‌های اضافی برای صفحه
-        $categories = Category::hasPosts()->mainCategories()->get();
-        $recentPosts = Post::published()->recent(5)->get();
-        $popularPosts = Post::published()->popular(5)->get();
-
-        return view('front.posts.index' , compact(
+        return view('front.posts.index', compact(
             'posts',
             'categories',
             'recentPosts',
-            'popularPosts',
-            'search',
-            'sort'
+            'popularTags'
         ));
     }
 
@@ -114,34 +85,51 @@ class PostController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($slug)
-{
-    $post = Post::where('slug', $slug)
-        ->with(['user', 'category', 'tags', 'comments' => function($query) {
-            $query->where('status', 'approved')
-                  ->whereNull('parent_id')
-                  ->with('replies');
+    {
+        $post = Post::with(['user', 'category', 'tags', 'comments.user'])
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->firstOrFail();
+
+        // مقالات مرتبط
+        $relatedPosts = Post::with(['user', 'category'])
+            ->where('category_id', $post->category_id)
+            ->where('id', '!=', $post->id)
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->inRandomOrder()
+            ->limit(3)
+            ->get();
+
+        // دسته‌بندی‌های فعال
+        $categories = Category::withCount(['posts' => function($query) {
+            $query->where('status', 'published')
+                  ->where('published_at', '<=', now());
         }])
-        ->firstOrFail();
-
-    // افزایش تعداد بازدید
-    $post->increment('view_count');
-
-    // مقالات مرتبط
-    $relatedPosts = Post::published()
-        ->where('category_id', $post->category_id)
-        ->where('id', '!=', $post->id)
-        ->limit(3)
+        ->whereHas('posts', function($query) {
+            $query->where('status', 'published')
+                  ->where('published_at', '<=', now());
+        })
+        ->orderBy('name')
         ->get();
 
-    // نظرات از رابطه بارگیری شده
-    $comments = $post->comments;
+        // برچسب‌های پرکاربرد
+        $popularTags = Tag::withCount(['posts' => function($query) {
+            $query->where('status', 'published')
+                  ->where('published_at', '<=', now());
+        }])
+        ->orderBy('posts_count', 'desc')
+        ->limit(10)
+        ->get();
 
-    return view('front.posts.show', compact(
-        'post',
-        'relatedPosts',
-        'comments'
-    ));
-}
+        return view('front.posts.show', compact(
+            'post',
+            'relatedPosts',
+            'categories',
+            'popularTags'
+        ));
+    }
 
     /**
      * Show the form for editing the specified resource.
@@ -175,5 +163,14 @@ class PostController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+     // افزایش بازدید
+    public function incrementView($id)
+    {
+        $post = Post::findOrFail($id);
+        $post->increment('view_count');
+
+        return response()->json(['success' => true]);
     }
 }

@@ -324,7 +324,7 @@
             @if ($post->tags->count() > 0)
                 <div class="tags-list mt-4">
                     @foreach ($post->tags->take(3) as $tag)
-                        <a href="{{ route('tag.show', $tag->slug) }}" class="tag">
+                        <a href="{{ route('tags.show', $tag->slug) }}" class="tag">
                             #{{ $tag->name }}
                         </a>
                     @endforeach
@@ -337,7 +337,7 @@
     </header>
 
     <div class="article-main">
-        <!-- محتوای اصلی -->
+        <!-- //TODO: محتوای اصلی -->
         <main class="article-content-wrapper">
             <!-- تصویر شاخص -->
             @if ($post->featured_image)
@@ -362,7 +362,7 @@
                     <h3 class="tags-title">برچسب‌های مقاله</h3>
                     <div class="tags-list">
                         @foreach ($post->tags as $tag)
-                            <a href="{{ route('tag.show', $tag->slug) }}" class="tag">
+                            <a href="{{ route('tags.show', $tag->slug) }}" class="tag">
                                 {{ $tag->name }}
                             </a>
                         @endforeach
@@ -398,7 +398,7 @@
                 <img src="{{ $post->user->avatar_url }}" alt="{{ $post->user->name }}" class="author-avatar-large">
                 <div class="author-info-large">
                     <h3>
-                        <a href="{{ route('author.show', $post->user->username) }}">
+                        <a href="{{ route('authors.show', $post->user->name) }}">
                             {{ $post->user->name }}
                         </a>
                     </h3>
@@ -413,7 +413,7 @@
                             <i class="fas fa-calendar"></i> عضو از {{ $post->user->created_at->diffForHumans() }}
                         </span>
                     </div>
-                    <a href="{{ route('author.show', $post->user->username) }}" class="btn btn-outline mt-3">
+                    <a href="{{ route('authors.show', $post->user->name) }}" class="btn btn-outline mt-3">
                         <i class="fas fa-user"></i> مشاهده پروفایل نویسنده
                     </a>
                 </div>
@@ -488,10 +488,10 @@
             </div>
         </main>
 
-        <!-- سایدبار -->
+        <!-- // سایدبار -->
         <aside class="article-sidebar">
-            <!-- اشتراک‌گذاری عمودی -->
-            <div class="share-widget">
+            <!-- //FIXME: اشتراک‌گذاری عمودی -->
+            {{-- <div class="share-widget">
                 <h4 class="share-title">اشتراک‌گذاری</h4>
                 <div class="share-buttons-vertical">
                     <a href="https://t.me/share/url?url={{ urlencode(url()->current()) }}&text={{ urlencode($post->title) }}"
@@ -515,7 +515,7 @@
                         <span>توییتر</span>
                     </a>
                 </div>
-            </div>
+            </div> --}}
 
             <!-- اطلاعات مقاله -->
             <div class="sidebar widget">
@@ -565,7 +565,7 @@
                                     @endif
                                     <div class="recent-post-content">
                                         <h4 class="recent-post-title">
-                                            <a href="{{ route('post.show', $relatedPost->slug) }}">
+                                            <a href="{{ route('posts.show', $relatedPost->slug) }}">
                                                 {{ Str::limit($relatedPost->title, 50) }}
                                             </a>
                                         </h4>
@@ -588,7 +588,7 @@
                         <ul class="category-list">
                             @foreach ($categories as $category)
                                 <li>
-                                    <a href="{{ route('category.show', $category->slug) }}">
+                                    <a href="{{ route('categories.show', $category->slug) }}">
                                         {{ $category->name }}
                                         <span class="category-count">{{ $category->posts_count ?? 0 }}</span>
                                     </a>

@@ -179,30 +179,22 @@ class Post extends Model
      * دریافت آدرس کامل تصویر شاخص
      * @return string
      */
-    // public function getThumbnailUrlAttribute()
-    // {
-    //     if ($this->thumbnail) {
-    //         return asset('storage/' . $this->thumbnail->path);
-    //     }
-
-    //     // تصویر پیش‌فرض
-    //     return asset('images/default-thumbnail.jpg');
-    // }
     // Getter برای featured_image
     public function getFeaturedImageUrlAttribute()
     {
-        if ($this->featured_image) {
-            // اگر مسیر کامل است (شامل http)
-            if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
-                return $this->featured_image;
-            }
-            
-            // اگر مسیر نسبی است
-            return asset('storage/' . $this->featured_image);
+        if (!$this->featured_image) {
+            return asset('storage/posts/featured/default-post.jpg');
         }
-        
-        // تصویر پیش‌فرض
-        return asset('images/default-post.jpg');
+
+        // این دو حالت را چک کن:
+
+        // حالت ۱: اگر مسیر کامل از قبل storage/ دارد
+        if (Str::startsWith($this->featured_image, 'storage/')) {
+            return asset($this->featured_image);
+        }
+
+        // حالت ۲: اگر مسیر نسبی است (posts/featured/...)
+        return asset('storage/' . $this->featured_image);
     }
 
     /**
