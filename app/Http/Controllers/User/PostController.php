@@ -304,7 +304,7 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post , $id)
+    public function destroy($id)
     {
         $post = Post::where('user_id', Auth::id())->findOrFail($id);
 
