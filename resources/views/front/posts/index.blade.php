@@ -46,7 +46,7 @@
                     @if ($posts->count() > 0)
                         <div class="posts-grid">
                             @foreach ($posts as $post)
-                                @include('front.partials.post-card', ['post' => $post])
+                                @include('front.posts.partials.post-card', ['post' => $post])
                             @endforeach
                         </div>
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Front;
 
 use App\Models\Category;
+use App\Models\Post;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -47,26 +48,45 @@ class CategoryController extends Controller
      */
     public function show($slug)
     {
-        $category = Category::where('slug' , $slug)->firstOrFail();
+        $category = Category::where('slug', $slug)
+            ->withCount(['posts' => function($query) {
+                $query->where('status', 'published')
+                    ->where('published_at', '<=', now());
+            }])
+            ->firstOrFail();
+
         $posts = $category->posts()
-            ->published()
-            ->latest()
-            ->paginate(10);
+            ->with(['user', 'category', 'tags'])
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->orderBy('published_at', 'desc')
+            ->paginate(12);
 
-        // زیردسته‌ها
-        $subcategories = $category->children()->hasPosts()->get();
+        // دسته‌بندی‌های دیگر برای سایدبار
+        $categories = Category::withCount(['posts' => function($query) {
+            $query->where('status', 'published')
+                ->where('published_at', '<=', now());
+        }])
+        ->whereHas('posts', function($query) {
+            $query->where('status', 'published')
+                ->where('published_at', '<=', now());
+        })
+        ->orderBy('name')
+        ->get();
 
-        // دسته‌بندی‌های هم‌سطح
-        $siblingCategories = Category::where('parent_id' , $category->parent_id)
-            ->where('id' , '!=' , $category->id)
-            ->hasPosts()
+        // مقالات اخیر
+        $recentPosts = Post::with(['user', 'category'])
+            ->where('status', 'published')
+            ->where('published_at', '<=', now())
+            ->orderBy('published_at', 'desc')
+            ->limit(5)
             ->get();
 
-        return view('front.categories.show' , compact(
-            'category' ,
+        return view('front.categories.show', compact(
+            'category',
             'posts',
-            'subcategories',
-            'siblingCategories',
+            'categories',
+            'recentPosts'
         ));
     }
 
