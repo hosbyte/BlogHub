@@ -27,19 +27,32 @@ class DashboardController extends Controller
             'total_comments' => Comment::where('user_id' , $user->id)->count(),
             'approved_comments' => Comment::where('user_id' , $user->id)->where('status' , 'approved')->count(),
             'member_since' => $user->created_at->format('d F Y'),
-            'last_login' => $user->last_login_at ? $user->last_login_at->diffForHumans() : 'اولین ورود'
+            'total_views' => Post::where('user_id', $user->id)->sum('view_count'),
+            'last_login' => $user->last_login_at ? $user->last_login_at->diffForHumans() : 'اولین ورود',
         ];
 
         // مقالات اخیر کاربر
-        $recent_posts = Post::where('user_id' , $user->id)->orderBy('created_at' , 'desc')->take(5)->get();
+        $recent_posts = Post::where('user_id' , $user->id)
+            ->orderBy('created_at' , 'desc')
+            ->take(5)->get();
 
         // نظرات اخیر کاربر
-        $recent_comments = Comment::where('user_id' , $user->id)->with('post')->orderBy('created_at' , 'desc')
+        $recent_comments = Comment::where('user_id' , $user->id)
+            ->with('post')
+            ->orderBy('created_at' , 'desc')
             ->take(5)->get();
-        
+
+        // مقالات پربازدید
+        $popular_posts = Post::with(['category'])
+            ->where('user_id', $user->id)
+            ->orderBy('view_count', 'desc')
+            ->limit(5)
+            ->get();
+
         return view('user.dashboard.index' , compact(
             'stats',
             'recent_posts',
+            'popular_posts',
             'recent_comments'
         ));
     }
