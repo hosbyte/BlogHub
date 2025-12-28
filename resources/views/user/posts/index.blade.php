@@ -159,8 +159,8 @@
                                         value="{{ $post->id }}">
                                 </td>
                                 <td>
-                                    @if ($post->thumbnail)
-                                        <img src="{{ asset('storage/' . $post->thumbnail->path) }}"
+                                    @if ($post->featured_image)
+                                        <img src="{{ $post->featured_image_url }}"
                                             alt="{{ $post->title }}" class="post-thumbnail"
                                             onerror="this.src='{{ asset('images/default-thumbnail.jpg') }}'">
                                     @else
