@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Front;
 
 use App\Http\Controllers\Controller;
+use App\Models\Tag;
+use App\Models\Post;
 use Illuminate\Http\Request;
 
 class TagController extends Controller
@@ -44,9 +46,28 @@ class TagController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Request $request , Tag $tag)
     {
-        //
+
+        // تست ۱: بررسی خود برچسب
+        // dd($tag->toArray());
+        // مقالات مرتبط با این برچسب
+        $posts = Post::query()
+            ->whereHas('tags' , function($query) use ($tag) {
+                $query->where('tags.id' , $tag->id);
+            })
+            ->published()
+            ->with(['category' , 'user' , 'tags'])
+            ->orderBy('published_at' , 'desc')
+            ->paginate(12);
+
+        // برچسب‌های محبوب برای سایدبار
+        $popularTags = Tag::withCount('posts')
+            ->orderBy('posts_count' , 'desc')
+            ->limit(15)
+            ->get();
+
+        return view('front.tags.show' , compact('tag' , 'posts' , 'popularTags'));
     }
 
     /**
@@ -81,5 +102,18 @@ class TagController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function search(Request $request)
+    {
+        $query = $request->get('q');
+        
+        $tags = Tag::when($query, function ($q) use ($query) {
+            return $q->where('name', 'LIKE', "%{$query}%");
+        })
+        ->limit(10)
+        ->get(['id', 'name']);
+        
+        return response()->json($tags);
     }
 }

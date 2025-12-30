@@ -17,10 +17,6 @@ class HomeController extends Controller
     public function index()
     {
         $data = [
-            // مقالات ویژه - از Post
-            // 'featuredPosts' => Post::published()->featured()->limit(3)->get(),
-            // مقالات اخیر - از Post
-            // 'recentPosts' => Post::published()->recent(6)->get(),
             // مقالات پربازدید - از Post
             'popularPosts' => Post::published()->popular(5)->get(),
             // دسته‌بندی‌ها - از Category (بدون published!)

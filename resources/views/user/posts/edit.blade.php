@@ -333,7 +333,7 @@
 
                         <div class="form-grid">
                             <!-- برچسب‌ها -->
-                            <div class="form-field">
+                            {{-- <div class="form-field">
                                 <label class="field-label">
                                     <i class="fas fa-tags"></i>
                                     برچسب‌ها
@@ -352,6 +352,49 @@
                                         <option value="{{ $tag->name }}">{{ $tag->name }}</option>
                                     @endforeach
                                 </select>
+                            </div> --}}
+
+                            <div class="form-grid">
+                                <!-- برچسب‌ها -->
+                                <div class="form-field">
+                                    <label class="field-label">
+                                        <i class="fas fa-tags"></i>
+                                        برچسب‌ها
+                                    </label>
+                                    <select name="tags[]" id="tagsSelect" class="form-input" multiple="multiple">
+                                        <!-- مقدارهای قبلی (old) -->
+                                        @if (old('tags'))
+                                            @foreach (old('tags') as $tagId)
+                                                @php
+                                                    $tag = App\Models\Tag::find($tagId);
+                                                @endphp
+                                                @if ($tag)
+                                                    <option value="{{ $tag->id }}" selected>{{ $tag->name }}
+                                                    </option>
+                                                @endif
+                                            @endforeach
+                                        @endif
+
+                                        <!-- اگر در حالت ویرایش هستیم -->
+                                        @if (isset($post) && $post->tags->count() > 0)
+                                            @foreach ($post->tags as $tag)
+                                                <option value="{{ $tag->id }}" selected>{{ $tag->name }}</option>
+                                            @endforeach
+                                        @endif
+
+                                        <!-- تمام برچسب‌های موجود -->
+                                        @foreach ($existingTags as $tag)
+                                            <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    @error('tags')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                    @error('tags.*')
+                                        <span class="field-error">{{ $message }}</span>
+                                    @enderror
+                                </div>
                             </div>
 
                             <!-- وضعیت -->

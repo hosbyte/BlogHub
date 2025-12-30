@@ -328,7 +328,7 @@
 
                         <div class="form-grid">
                             <!-- برچسب‌ها -->
-                            <div class="form-field">
+                            {{-- <div class="form-field">
                                 <label class="field-label">
                                     <i class="fas fa-tags"></i>
                                     برچسب‌ها
@@ -341,104 +341,146 @@
                                     @endif
                                     <!-- برچسب‌های موجود از دیتابیس -->
                                     @foreach ($existingTags as $tag)
-                                        <option value="{{ $tag->name }}">{{ $tag->name }}</option>
+                                        <option value="{{ $tag->id }}">{{ $tag->id }}</option>
                                     @endforeach
                                 </select>
-                            </div>
+                            </div> --}}
 
-                            <!-- وضعیت -->
+                        <div class="form-grid">
+                            <!-- برچسب‌ها -->
                             <div class="form-field">
                                 <label class="field-label">
-                                    <i class="fas fa-globe"></i>
-                                    وضعیت انتشار
+                                    <i class="fas fa-tags"></i>
+                                    برچسب‌ها
                                 </label>
-                                <div class="option-group">
-                                    <label class="option-item">
-                                        <input type="radio" name="status" value="draft"
-                                            {{ old('status', 'draft') == 'draft' ? 'checked' : '' }}>
-                                        <span class="option-label">
-                                            <i class="fas fa-save"></i>
-                                            پیش‌نویس
-                                        </span>
-                                    </label>
-                                    <label class="option-item">
-                                        <input type="radio" name="status" value="published"
-                                            {{ old('status') == 'published' ? 'checked' : '' }}>
-                                        <span class="option-label">
-                                            <i class="fas fa-paper-plane"></i>
-                                            منتشر شده
-                                        </span>
-                                    </label>
-                                </div>
+                                <select name="tags[]" id="tagsSelect" class="form-input" multiple="multiple">
+                                    <!-- مقدارهای قبلی (old) -->
+                                    @if (old('tags'))
+                                        @foreach (old('tags') as $tagId)
+                                            @php
+                                                $tag = App\Models\Tag::find($tagId);
+                                            @endphp
+                                            @if ($tag)
+                                                <option value="{{ $tag->id }}" selected>{{ $tag->name }}</option>
+                                            @endif
+                                        @endforeach
+                                    @endif
+
+                                    <!-- اگر در حالت ویرایش هستیم -->
+                                    @if (isset($post) && $post->tags->count() > 0)
+                                        @foreach ($post->tags as $tag)
+                                            <option value="{{ $tag->id }}" selected>{{ $tag->name }}</option>
+                                        @endforeach
+                                    @endif
+
+                                    <!-- تمام برچسب‌های موجود -->
+                                    @foreach ($existingTags as $tag)
+                                        <option value="{{ $tag->id }}">{{ $tag->name }}</option>
+                                    @endforeach
+                                </select>
+
+                                @error('tags')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
+                                @error('tags.*')
+                                    <span class="field-error">{{ $message }}</span>
+                                @enderror
                             </div>
                         </div>
 
-                        <!-- تاریخ انتشار -->
+                        <!-- وضعیت -->
                         <div class="form-field">
                             <label class="field-label">
-                                <i class="fas fa-calendar-alt"></i>
-                                زمان انتشار (اختیاری)
+                                <i class="fas fa-globe"></i>
+                                وضعیت انتشار
                             </label>
-                            <input type="datetime-local" name="published_at" class="form-input" id="publishedAt"
-                                value="{{ old('published_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
+                            <div class="option-group">
+                                <label class="option-item">
+                                    <input type="radio" name="status" value="draft"
+                                        {{ old('status', 'draft') == 'draft' ? 'checked' : '' }}>
+                                    <span class="option-label">
+                                        <i class="fas fa-save"></i>
+                                        پیش‌نویس
+                                    </span>
+                                </label>
+                                <label class="option-item">
+                                    <input type="radio" name="status" value="published"
+                                        {{ old('status') == 'published' ? 'checked' : '' }}>
+                                    <span class="option-label">
+                                        <i class="fas fa-paper-plane"></i>
+                                        منتشر شده
+                                    </span>
+                                </label>
+                            </div>
                         </div>
+                    </div>
 
-                        <!-- پنل کناری -->
-                        <div class="sidebar-panel">
-                            <div class="panel-header">
-                                <i class="fas fa-chart-line panel-icon"></i>
-                                <h4 class="panel-title">آمار مقاله</h4>
-                            </div>
-                            <div class="panel-content">
-                                <p><i class="fas fa-eye"></i> پیش‌بینی بازدید: <span id="viewEstimate">0</span></p>
-                                <p><i class="fas fa-clock"></i> زمان خوانش: <span id="readTime">0</span> دقیقه</p>
-                                <p><i class="fas fa-file-word"></i> تعداد کلمات: <span id="wordCount">0</span></p>
-                                <p><i class="fas fa-images"></i> تعداد تصاویر: <span id="imageCount">0</span></p>
-                            </div>
+                    <!-- تاریخ انتشار -->
+                    <div class="form-field">
+                        <label class="field-label">
+                            <i class="fas fa-calendar-alt"></i>
+                            زمان انتشار (اختیاری)
+                        </label>
+                        <input type="datetime-local" name="published_at" class="form-input" id="publishedAt"
+                            value="{{ old('published_at', \Carbon\Carbon::now()->format('Y-m-d\TH:i')) }}">
+                    </div>
+
+                    <!-- پنل کناری -->
+                    <div class="sidebar-panel">
+                        <div class="panel-header">
+                            <i class="fas fa-chart-line panel-icon"></i>
+                            <h4 class="panel-title">آمار مقاله</h4>
+                        </div>
+                        <div class="panel-content">
+                            <p><i class="fas fa-eye"></i> پیش‌بینی بازدید: <span id="viewEstimate">0</span></p>
+                            <p><i class="fas fa-clock"></i> زمان خوانش: <span id="readTime">0</span> دقیقه</p>
+                            <p><i class="fas fa-file-word"></i> تعداد کلمات: <span id="wordCount">0</span></p>
+                            <p><i class="fas fa-images"></i> تعداد تصاویر: <span id="imageCount">0</span></p>
                         </div>
                     </div>
                 </div>
+        </div>
 
-                <!-- دکمه‌های فرم -->
-                <div class="form-actions">
-                    <div class="form-stats">
-                        <div class="stat-box">
-                            <div class="stat-value" id="totalChars">0</div>
-                            <div class="stat-label">کاراکتر</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="totalWords">0</div>
-                            <div class="stat-label">کلمه</div>
-                        </div>
-                        <div class="stat-box">
-                            <div class="stat-value" id="totalImages">0</div>
-                            <div class="stat-label">تصویر</div>
-                        </div>
-                    </div>
-
-                    <div class="action-buttons">
-                        <button type="button" class="btn btn-outline" id="prevSectionBtn">
-                            <i class="fas fa-arrow-right"></i> بخش قبلی
-                        </button>
-                        <button type="button" class="btn btn-outline" id="nextSectionBtn">
-                            بخش بعدی <i class="fas fa-arrow-left"></i>
-                        </button>
-                        <button type="submit" name="action" value="draft" class="btn btn-outline" id="saveDraftBtn">
-                            <i class="fas fa-save"></i> ذخیره پیش‌نویس
-                        </button>
-                        <button type="submit" name="action" value="publish" class="btn btn-primary" id="publishBtn">
-                            <i class="fas fa-paper-plane"></i> انتشار مقاله
-                        </button>
-                    </div>
+        <!-- دکمه‌های فرم -->
+        <div class="form-actions">
+            <div class="form-stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="totalChars">0</div>
+                    <div class="stat-label">کاراکتر</div>
                 </div>
-            </form>
-        </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalWords">0</div>
+                    <div class="stat-label">کلمه</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="totalImages">0</div>
+                    <div class="stat-label">تصویر</div>
+                </div>
+            </div>
 
-        <!-- لودینگ -->
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="spinner"></div>
-            <div class="loading-text">در حال پردازش...</div>
+            <div class="action-buttons">
+                <button type="button" class="btn btn-outline" id="prevSectionBtn">
+                    <i class="fas fa-arrow-right"></i> بخش قبلی
+                </button>
+                <button type="button" class="btn btn-outline" id="nextSectionBtn">
+                    بخش بعدی <i class="fas fa-arrow-left"></i>
+                </button>
+                <button type="submit" name="action" value="draft" class="btn btn-outline" id="saveDraftBtn">
+                    <i class="fas fa-save"></i> ذخیره پیش‌نویس
+                </button>
+                <button type="submit" name="action" value="publish" class="btn btn-primary" id="publishBtn">
+                    <i class="fas fa-paper-plane"></i> انتشار مقاله
+                </button>
+            </div>
         </div>
+        </form>
+    </div>
+
+    <!-- لودینگ -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <div class="loading-text">در حال پردازش...</div>
+    </div>
     </div>
 @endsection
 

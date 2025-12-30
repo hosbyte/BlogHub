@@ -37,7 +37,7 @@ Route::prefix('blog')->name('posts.')->group(function() {
 Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('categories.show');
 
 // برچسب ها
-Route::get('/tags/{slug}' , [TagController::class , 'show'])->name('tags.show');
+Route::get('/tags/{tag:slug}' , [TagController::class , 'show'])->name('tags.show');
 
 // نویسندگان
 Route::get('/authors/{username}' , [AuthorController::class , 'show'])->name('authors.show');
@@ -76,6 +76,9 @@ Route::middleware('auth')->prefix('user')->name('user.')->group(function() {
     // عملیات گروهی
     Route::post('/posts/bulk-status' , [UserPostController::class , 'bulkChangeStatus'])->name('posts.bulk-status');
     Route::post('/posts/bulk-delete', [UserPostController::class, 'bulkDelete'])->name('posts.bulk-delete');
+
+    // جستوجوی برچسب
+    Route::get('/user/tags/search', [TagController::class, 'search'])->name('user.tags.search');
 });
 
 require __DIR__.'/auth.php';
