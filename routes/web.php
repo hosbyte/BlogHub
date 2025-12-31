@@ -43,7 +43,11 @@ Route::get('/tags/{tag:slug}' , [TagController::class , 'show'])->name('tags.sho
 Route::get('/authors/{username:username}' , [AuthorController::class , 'show'])->name('authors.show');
 
 // جستوجو
-Route::get('/search' , [SearchController::class , 'index'])->name('search');
+Route::get('/search/{username}' , [SearchController::class , 'index'])->name('search.index');
+
+Route::get('/test-search-route', function() {
+    return 'Route جستجو تست - OK';
+});
 
 // نظرات (نیاز به auth)
 Route::middleware('auth')->group(function () {

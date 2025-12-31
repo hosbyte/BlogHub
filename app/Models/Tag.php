@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str; 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Str;
 
 class Tag extends Model
 {
@@ -23,11 +23,11 @@ class Tag extends Model
      * رابطه چند به چند با جدول posts
      * یک برچسب می‌تواند متعلق به چندین مقاله باشد
      */
-    public function posts()
-    {
-        return $this->belongsToMany(Post::class, 'post_tag')
-            ->withTimestamps();
-    }
+    // public function posts()
+    // {
+    //     return $this->belongsToMany(Post::class, 'post_tag')
+    //         ->withTimestamps();
+    // }
 
     /**
      * دریافت تعداد مقالات این برچسب
@@ -93,5 +93,36 @@ class Tag extends Model
         }
 
         return $tagIds;
+    }
+
+    /**
+     * Scope برای دریافت برچسب‌های محبوب
+     */
+    public function scopePopular($query, $limit = 20)
+    {
+        return $query->withCount(['posts' => function ($query) {
+                $query->published(); // فقط مقالات منتشر شده
+            }])
+            ->having('posts_count', '>', 0)
+            ->orderBy('posts_count', 'desc')
+            ->limit($limit);
+    }
+
+    /**
+     * Scope برای دریافت برچسب‌هایی که مقاله دارند
+     */
+    public function scopeHasPosts($query)
+    {
+        return $query->whereHas('posts', function ($query) {
+            $query->published();
+        });
+    }
+
+    /**
+     * رابطه با مقالات
+     */
+    public function posts()
+    {
+        return $this->belongsToMany(Post::class);
     }
 }
