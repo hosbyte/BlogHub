@@ -22,6 +22,7 @@
     <!-- استایل اصلی پروژه -->
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/post-form.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/author.css') }}">
 
     @yield('styles')
 </head>
@@ -91,7 +92,7 @@
                                 </a>
                                 <hr class="dropdown-divider">
                             @elseif(Auth::user()->hasRole('author'))
-                                <a href="{{ route('author.dashboard') }}" class="dropdown-item">
+                                {{-- <a href="{{ route('author.dashboard') }}" class="dropdown-item"> --}}
                                     <i class="fas fa-edit"></i> پنل نویسنده
                                 </a>
                                 <hr class="dropdown-divider">
@@ -157,7 +158,7 @@
                     <li><a href="{{ route('admin.dashboard') }}"><i class="fas fa-tachometer-alt"></i> پنل مدیریت</a>
                     </li>
                 @elseif(Auth::user()->hasRole('author'))
-                    <li><a href="{{ route('author.dashboard') }}"><i class="fas fa-edit"></i> پنل نویسنده</a></li>
+                    {{-- <li><a href="{{ route('author.dashboard') }}"><i class="fas fa-edit"></i> پنل نویسنده</a></li> --}}
                 @endif
 
                 <li><a href="{{ route('user.dashboard') }}"><i class="fas fa-user-circle"></i> پنل کاربری</a></li>

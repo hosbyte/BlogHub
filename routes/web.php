@@ -40,7 +40,7 @@ Route::get('/categories/{slug}' , [CategoryController::class , 'show'])->name('c
 Route::get('/tags/{tag:slug}' , [TagController::class , 'show'])->name('tags.show');
 
 // نویسندگان
-Route::get('/authors/{username}' , [AuthorController::class , 'show'])->name('authors.show');
+Route::get('/authors/{username:username}' , [AuthorController::class , 'show'])->name('authors.show');
 
 // جستوجو
 Route::get('/search' , [SearchController::class , 'index'])->name('search');
