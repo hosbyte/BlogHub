@@ -48,7 +48,6 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
-        // 'password' => 'hashed',
         'last_login_at' => 'datetime',
         'status' => 'string',
     ];
@@ -123,7 +122,13 @@ class User extends Authenticatable
     public function hasRole($role)
     {
         // اگر کاربر نقش داشته باشد و نام نقش برابر با پارامتر باشد
-        return $this->role && $this->role->name === $role;
+        // return $this->role && $this->role->name === $role;
+        if (is_string($role))
+        {
+            return $this->role->name === $role;
+        }
+
+        return $this->role_id === $role->id;
     }
 
     /**
@@ -132,7 +137,8 @@ class User extends Authenticatable
      */
     public function isAdmin()
     {
-        return $this->hasRole('admin');
+        // return $this->hasRole('admin');
+        return $this->role_id == 1; 
     }
 
     /**
@@ -141,7 +147,8 @@ class User extends Authenticatable
      */
     public function isAuthor()
     {
-        return $this->hasRole('author');
+        // return $this->hasRole('author');
+        return $this->role_id == 2;
     }
 
     /**

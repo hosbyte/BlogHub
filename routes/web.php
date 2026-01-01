@@ -43,11 +43,7 @@ Route::get('/tags/{tag:slug}' , [TagController::class , 'show'])->name('tags.sho
 Route::get('/authors/{username:username}' , [AuthorController::class , 'show'])->name('authors.show');
 
 // جستوجو
-Route::get('/search/{username}' , [SearchController::class , 'index'])->name('search.index');
-
-Route::get('/test-search-route', function() {
-    return 'Route جستجو تست - OK';
-});
+Route::get('/search', [SearchController::class, 'index'])->name('search.index');
 
 // نظرات (نیاز به auth)
 Route::middleware('auth')->group(function () {
@@ -56,7 +52,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // افزایش بازدید
-// Route::get('/posts/{post}/view' , [FrontPostController::class , 'incrementView'])->name('post.view');
 Route::get('/posts/{post}/view' , [FrontPostController::class , 'incrementView'])->name('post.incrementView');
 
 // پنل کاربری

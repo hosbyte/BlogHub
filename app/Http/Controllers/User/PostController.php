@@ -85,6 +85,8 @@ class PostController extends Controller
      */
     public function create()
     {
+        $this->authorize('create' , Post::class);
+
         // دریافت دسته‌بندی‌ها
         $categories = Category::with('children')
             ->whereNull('parent_id')
@@ -105,6 +107,8 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Post::class);
+
         // اعتبارسنجی
         $validated = $request->validate([
             'title' => 'required|string|max:200',
@@ -206,8 +210,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Post $post , $id)
     {
+        $this->authorize('update', $post);
+
         // فقط مقالات کاربر جاری
         $post = Post::where('user_id', Auth::id())->findOrFail($id);
 
@@ -304,8 +310,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Post $post , $id)
     {
+        $this->authorize('delete', $post);
+
         $post = Post::where('user_id', Auth::id())->findOrFail($id);
 
         // حذف تصویر شاخص

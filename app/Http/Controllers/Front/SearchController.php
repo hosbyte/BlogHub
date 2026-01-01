@@ -18,33 +18,33 @@ class SearchController extends Controller
      */
     public function index(Request $request)
     {
-        $startTime = microtime(true);
-
-        // دریافت پارامترهای جستجو
         $query = $request->get('q', '');
         $category = $request->get('category');
         $tag = $request->get('tag');
-        $sort = $request->get('sort', 'relevance');
-        $dateFrom = $request->get('date_from');
-        $dateTo = $request->get('date_to');
+        $sort = $request->get('sort', 'newest');
 
-        // اگر هیچ پارامتری نداریم، صفحه خالی نشان دهیم
-        if (empty($query) && empty($category) && empty($tag))
-        {
+        // اگر هیچ پارامتری نیست، صفحه خالی نشان بده
+        if (empty($query) && empty($category) && empty($tag)) {
             return view('front.search.index', [
-                'query' => $query,
+                'query' => '',
                 'results' => collect(),
                 'totalResults' => 0,
-                'categories' => Category::hasPosts()->get(),
-                'popularTags' => Tag::popular()->limit(20)->get(),
-                'executionTime' => 0,
-                'suggestions' => $this->getSearchSuggestions(),
+                'categories' => Category::has('posts')->get(),
+                'popularTags' => Tag::withCount('posts')
+                    ->orderBy('posts_count', 'desc')
+                    ->limit(20)
+                    ->get(),
+                'selectedCategory' => null,
+                'selectedTag' => null,
+                'selectedSort' => $sort,
             ]);
         }
 
         // شروع جستجو
         $searchQuery = Post::query()
-            ->published()
+            ->where('status', 'published')
+            ->whereNotNull('published_at')
+            ->where('published_at', '<=', now())
             ->with(['category', 'user', 'tags']);
 
         // جستجوی متن
@@ -70,64 +70,35 @@ class SearchController extends Controller
             });
         }
 
-        // فیلتر تاریخ
-        if (!empty($dateFrom)) {
-            $searchQuery->whereDate('published_at', '>=', $dateFrom);
-        }
-
-        if (!empty($dateTo)) {
-            $searchQuery->whereDate('published_at', '<=', $dateTo);
-        }
-
         // مرتب‌سازی
         switch ($sort) {
-            case 'newest':
-                $searchQuery->orderBy('published_at', 'desc');
-                break;
             case 'oldest':
                 $searchQuery->orderBy('published_at', 'asc');
                 break;
             case 'popular':
                 $searchQuery->orderBy('view_count', 'desc');
                 break;
-            default: // relevance
-                if (!empty($query)) {
-                    $searchQuery->orderByRaw(
-                        "CASE
-                            WHEN title LIKE ? THEN 1
-                            WHEN excerpt LIKE ? THEN 2
-                            ELSE 3
-                        END",
-                        ["%{$query}%", "%{$query}%"]
-                    );
-                }
+            default: // newest
                 $searchQuery->orderBy('published_at', 'desc');
         }
 
-        // اجرای جستجو
         $results = $searchQuery->paginate(12);
         $totalResults = $results->total();
 
-        // محاسبه زمان اجرا
-        $executionTime = round(microtime(true) - $startTime, 3);
-
-        // داده‌های مورد نیاز برای View
         return view('front.search.index', [
             'query' => $query,
             'results' => $results,
             'totalResults' => $totalResults,
-            'categories' => Category::hasPosts()->get(),
-            'popularTags' => Tag::popular()->limit(20)->get(),
+            'categories' => Category::has('posts')->get(),
+            'popularTags' => Tag::withCount('posts')
+                ->orderBy('posts_count', 'desc')
+                ->limit(20)
+                ->get(),
             'selectedCategory' => $category,
             'selectedTag' => $tag,
             'selectedSort' => $sort,
-            'dateFrom' => $dateFrom,
-            'dateTo' => $dateTo,
-            'executionTime' => $executionTime,
-            'suggestions' => $this->getSearchSuggestions($query),
         ]);
     }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -192,41 +163,5 @@ class SearchController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    /**
-     * دریافت پیشنهادات جستجو
-     */
-    private function getSearchSuggestions($query = null)
-    {
-        $suggestions = [];
-
-        if (!empty($query) && strlen($query) > 2) {
-            // پیشنهادات مشابه
-            $similarPosts = Post::published()
-                ->where('title', 'LIKE', "%{$query}%")
-                ->orWhereHas('tags', function ($q) use ($query) {
-                    $q->where('name', 'LIKE', "%{$query}%");
-                })
-                ->limit(5)
-                ->get(['title', 'slug']);
-
-            $suggestions['similar_posts'] = $similarPosts;
-
-            // دسته‌بندی‌های مرتبط
-            $relatedCategories = Category::where('name', 'LIKE', "%{$query}%")
-                ->hasPosts()
-                ->limit(3)
-                ->get(['name', 'slug']);
-
-            $suggestions['related_categories'] = $relatedCategories;
-        }
-
-        // محبوب‌ترین جستجوها (می‌توانید از جدول جداگانه استفاده کنید)
-        $suggestions['popular_searches'] = [
-            'laravel', 'php', 'javascript', 'ویژه', 'آموزش'
-        ];
-
-        return $suggestions;
     }
 }
